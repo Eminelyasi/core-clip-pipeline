@@ -1,0 +1,3 @@
+# The bot commits this file from a Windows runner. Pinning it to LF stops
+# core.autocrlf from making every run see a phantom change and re-commit it.
+state/processed.json text eol=lf

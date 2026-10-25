@@ -34,21 +34,31 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - name: Locate ffmpeg
+      - name: Locate ffmpeg and git
         shell: powershell
         run: |
-          $dir = Join-Path $env:USERPROFILE "clipforge\ffmpeg\bin"
-          if (-not (Test-Path (Join-Path $dir "ffmpeg.exe"))) {
+          $dirs = @()
+          $ff = Join-Path $env:USERPROFILE "clipforge\ffmpeg\bin"
+          if (-not (Test-Path (Join-Path $ff "ffmpeg.exe"))) {
             $found = Get-Command ffmpeg -ErrorAction SilentlyContinue
             if ($found) {
-              $dir = Split-Path $found.Source
+              $ff = Split-Path $found.Source
             } else {
               Write-Error "ffmpeg not found. Run SETUP.md Plan B step 5 (winget install Gyan.FFmpeg)."
               exit 1
             }
           }
-          $dir | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
-          & (Join-Path $dir "ffmpeg.exe") -version | Select-Object -First 1
+          $dirs += $ff
+
+          if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
+            foreach ($candidate in @("C:\Program Files\Git\cmd", "C:\Program Files (x86)\Git\cmd")) {
+              if (Test-Path (Join-Path $candidate "git.exe")) { $dirs += $candidate; break }
+            }
+          }
+          foreach ($d in $dirs) { $d | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8 }
+
+          & (Join-Path $ff "ffmpeg.exe") -version | Select-Object -First 1
+          Write-Output "added to PATH: $($dirs -join '; ')"
 
       - name: Install Python deps
         shell: powershell
@@ -142,13 +152,15 @@ jobs:
         if: success()
         shell: powershell
         run: |
+          git config core.autocrlf false
           $status = git status --porcelain state/processed.json
           if ($status) {
             git config user.name  "clipforge-bot"
             git config user.email "clipforge-bot@users.noreply.github.com"
             git add state/processed.json
             git commit -m "chore: update clip state [skip ci]"
-            git push
+            # checkout can leave a detached HEAD, so push the commit explicitly.
+            git push origin HEAD:main
           } else {
             Write-Output "state unchanged - nothing to commit"
           }
