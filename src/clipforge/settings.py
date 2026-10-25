@@ -84,11 +84,21 @@ class Render:
     preset: str = "veryfast"
     audio_lufs: float = -14.0
     burn_captions: bool = True
-    caption_font: str = "DejaVu Sans"
-    caption_size: int = 78
-    caption_outline: int = 5
-    caption_margin_v: int = 430
+    caption_style: str = "mrbeast"
+    caption_font: str = "Komika Axis"
+    caption_font_fallback: str = "Bangers"
+    caption_font_dir: str = ""
+    caption_size: int = 96
+    caption_outline: int = 8
+    caption_shadow: int = 4
+    caption_margin_v: int = 560
     caption_uppercase: bool = True
+    caption_bold: bool = True
+    caption_words_per_card: int = 1
+    caption_pop_ms: int = 90
+    caption_pop_scale: int = 118
+    keyword_color: str = "&H00FF00&"
+    keyword_outline: str = "&HFFFFFF&"
     max_chars_per_line: int = 20
 
     @classmethod
@@ -103,11 +113,21 @@ class Render:
             preset=str(_value(raw, "preset", "veryfast")),
             audio_lufs=float(_value(raw, "audio_lufs", -14.0)),
             burn_captions=bool(_value(raw, "burn_captions", True)),
-            caption_font=str(_value(raw, "caption_font", "DejaVu Sans")),
-            caption_size=int(_value(raw, "caption_size", 78)),
-            caption_outline=int(_value(raw, "caption_outline", 5)),
-            caption_margin_v=int(_value(raw, "caption_margin_v", 430)),
+            caption_style=str(_value(raw, "caption_style", "mrbeast")).lower(),
+            caption_font=str(_value(raw, "caption_font", "Komika Axis")),
+            caption_font_fallback=str(_value(raw, "caption_font_fallback", "Bangers")),
+            caption_font_dir=str(_value(raw, "caption_font_dir", "")),
+            caption_size=int(_value(raw, "caption_size", 96)),
+            caption_outline=int(_value(raw, "caption_outline", 8)),
+            caption_shadow=int(_value(raw, "caption_shadow", 4)),
+            caption_margin_v=int(_value(raw, "caption_margin_v", 560)),
             caption_uppercase=bool(_value(raw, "caption_uppercase", True)),
+            caption_bold=bool(_value(raw, "caption_bold", True)),
+            caption_words_per_card=max(1, int(_value(raw, "caption_words_per_card", 1))),
+            caption_pop_ms=max(0, int(_value(raw, "caption_pop_ms", 90))),
+            caption_pop_scale=int(_value(raw, "caption_pop_scale", 118)),
+            keyword_color=str(_value(raw, "keyword_color", "&H00FF00&")),
+            keyword_outline=str(_value(raw, "keyword_outline", "&HFFFFFF&")),
             max_chars_per_line=int(_value(raw, "max_chars_per_line", 20)),
         )
 

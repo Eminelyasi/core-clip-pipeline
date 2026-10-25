@@ -66,6 +66,34 @@ Offline check of the whole cut/render path, no YouTube involved:
 .\.venv\Scripts\python.exe tests\smoke_test.py
 ```
 
+## Captions (MrBeast style by default)
+
+Burned captions are one word at a time, in `Komika Axis`, with a zoom-in pop and the
+keyword of each line filled green with a white stroke — the look the big clipping pages
+use.
+
+| Piece | How it works |
+| --- | --- |
+| Font | `Komika Axis` from `~/clipforge/fonts` (personal-use font, **not** in git). Falls back to bundled `Bangers` (OFL) if missing. |
+| Timing | One word per card by default. Auto-captions only carry phrase timings, so word durations are split by character weight inside each cue. |
+| Pop | Each word starts at 118% and settles to 100% over 90 ms (`\fscx/\fscy` + `\t`). |
+| Keywords | Words like *insane*, *never*, *million*, *exposed* get `\c&H00FF00&` fill + `\3c&HFFFFFF&` stroke. Deliberately short list — highlight everything and nothing stands out. |
+| Fit | Words wider than 92% of the frame auto-shrink, so "UNBELIEVABLE" never clips the edges. |
+
+Change the style in `config.yaml`:
+
+```yaml
+render:
+  caption_style: mrbeast        # mrbeast | classic
+  caption_font: "Komika Axis"
+  caption_words_per_card: 1     # 1 = one-word pops, 2-3 = short cards
+  caption_size: 150
+```
+
+Font lookup order: `caption_font_dir` → `CLIPFORGE_FONTS` → `~/clipforge/fonts` →
+`assets/fonts`. Drop any `.ttf`/`.otf` in one of those and set `caption_font` to the
+family name.
+
 ## Deploy so it runs while you're away
 
 The live setup is the **self-hosted runner on this PC** (see
@@ -158,6 +186,9 @@ spent, and `run` tells you when it comes up short.
 | `targets.max_videos_downloaded` | Bandwidth cap per run. |
 | `analysis.weights` | Rebalance the four scoring signals. |
 | `render.layout` | `blur_pad` (default), `center_crop`, `fit`. |
+| `render.caption_style` | `mrbeast` (word pops, green keywords) or `classic` (two-line block). |
+| `render.caption_size` | 150 is the MrBeast look; 90-110 for a quieter style. |
+| `render.caption_words_per_card` | 1 = one-word pops. 2-3 shows short phrases per card. |
 | `render.caption_margin_v` | Raise if captions sit under the TikTok UI. |
 
 **How the score works.** Each 60s window gets four normalized signals:
@@ -182,8 +213,12 @@ Clips that fail `min_score` are dropped rather than padded out with filler.
 - **Volume.** See *Source volume* above: 10 clips/day needs roughly 5+ new source videos
   a week, or it runs out of material.
 - **Captions.** Free YouTube auto-captions are good enough to find moments, not perfect
-  as burned text. Set `analysis.whisper_fallback: true` and `pip install faster-whisper`
-  if you want accurate local transcription at the cost of compute.
+  as burned text. MrBeast-style word timing is derived from phrase timings, so occasionally
+  a word lands a beat early. Set `analysis.whisper_fallback: true` and
+  `pip install faster-whisper` if you want accurate local transcription at the cost of compute.
+- **Fonts.** `Komika Axis` is free for personal use only, so it is installed outside the
+  repo (`C:\Users\Amin\clipforge\fonts`). The repo ships `Bangers` under the OFL, so a
+  fresh clone still renders — it just looks slightly different.
 - **Nothing here posts for you.** That was the deal: files ready, you upload. Auto-posting
   to TikTok/IG needs third-party API access (Postiz, Blotato, etc.).
 
@@ -192,6 +227,7 @@ Clips that fail `min_score` are dropped rather than padded out with filler.
 ```
 config.yaml                     all tuning
 state/processed.json            dedupe memory (committed by the workflow)
+assets/fonts/                   Bangers.ttf + OFL.txt (redistributable fallback)
 src/clipforge/
   settings.py                   typed config
   yt.py                         yt-dlp: list, download, captions

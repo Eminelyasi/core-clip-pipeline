@@ -1,4 +1,4 @@
-# ============================================================
+﻿# ============================================================
 #  CORE clip pipeline - configuration
 #  Everything the daily job does is driven by this file.
 # ============================================================
@@ -89,13 +89,26 @@ render:
   crf: 22
   preset: veryfast
   audio_lufs: -14
+
   burn_captions: true
-  caption_font: "DejaVu Sans"
-  caption_size: 78
-  caption_outline: 5
-  caption_margin_v: 430    # clears TikTok / Reels UI
+  # mrbeast = one word at a time, zoom-in pop, keywords green with white stroke
+  # classic = the old two-line caption block
+  caption_style: mrbeast
+  caption_font: "Komika Axis"         # personal use only -> ~/clipforge/fonts (not in git)
+  caption_font_fallback: "Bangers"    # OFL, bundled in assets/fonts
+  caption_font_dir: ""                # optional extra folder to search for fonts
+  caption_size: 150
+  caption_outline: 12
+  caption_shadow: 6
+  caption_margin_v: 560    # clears TikTok / Reels UI
   caption_uppercase: true
-  max_chars_per_line: 20
+  caption_bold: true
+  caption_words_per_card: 1           # 1 = one-word pops; try 2-3 for short cards
+  caption_pop_ms: 90                  # how long the zoom-in takes
+  caption_pop_scale: 118              # starts at 118% and settles at 100%
+  keyword_color: "&H00FF00&"          # ASS is BGR - this is pure green
+  keyword_outline: "&HFFFFFF&"        # white stroke around the green words
+  max_chars_per_line: 20              # classic style only
 
 analysis:
   use_youtube_subs: true   # free auto-captions, no whisper needed
@@ -112,3 +125,5 @@ output:
   dir: "output"
   keep_source_files: false
   write_platform_captions: true
+
+

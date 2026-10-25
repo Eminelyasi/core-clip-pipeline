@@ -197,7 +197,44 @@ scored below `0.30`, lower `min_score` to `0.2` in `config.yaml`, commit, and pu
 
 ---
 
-## Step 8 — Get the clips onto your phone
+## Step 8 - Install the caption font (one time)
+
+Captions are burned with **Komika Axis**, MrBeast's caption font. It is free for
+personal use only, so it is **not** in the repo — it lives on this PC:
+
+```
+C:\Users\Amin\clipforge\fonts\Komika Axis.ttf
+```
+
+**Already done on this PC.** If you ever rebuild the machine, put the file back:
+
+1. Open <https://www.dafont.com/komika-axis.font> in a browser.
+2. Click **Download**, open the `.zip`, and find `KOMIKAX_.ttf`.
+3. Rename it to `Komika Axis.ttf` and copy it into `C:\Users\Amin\clipforge\fonts\`.
+   (Create the folder if it does not exist.)
+
+```powershell
+New-Item -ItemType Directory -Force -Path "$HOME\clipforge\fonts" | Out-Null
+Copy-Item "C:\path\to\KOMIKAX_.ttf" "$HOME\clipforge\fonts\Komika Axis.ttf"
+```
+
+No font file? It still works: the repo bundles **Bangers** (OFL) in `assets/fonts`, so a
+fresh clone renders with that instead. It looks close but a little narrower. Any other
+`.ttf` works too — drop it in the folder and set `caption_font` in `config.yaml`.
+
+Custom folder or a different drive? Point at it either way:
+
+```yaml
+render:
+  caption_font_dir: "D:\\fonts"   # config.yaml
+```
+```powershell
+$env:CLIPFORGE_FONTS = "D:\fonts"  # or an environment variable
+```
+
+---
+
+## Step 9 - Get the clips onto your phone
 
 **Option A (fastest, one zip):**
 1. On the run page, scroll to **Artifacts** → click `clips-N` to download the zip
@@ -220,7 +257,7 @@ captions/01_core_H438v5IcxFs_1204.instagram_reels.txt
 
 ---
 
-## Step 9 — Post them (this part is you, ~10 min)
+## Step 10 - Post them (this part is you, ~10 min)
 
 For each clip, best-first from `UPLOAD.txt`:
 
@@ -245,7 +282,7 @@ Post the same clip to all three — they don't penalize cross-posting.
 
 ---
 
-## Step 10 — After about a week
+## Step 11 - After about a week
 
 Open `config.yaml` and adjust based on what actually performed:
 
@@ -256,6 +293,9 @@ Open `config.yaml` and adjust based on what actually performed:
 | Clips feel repetitive | lower `max_clips_per_source_video` to `1` |
 | Runs take too long | lower `max_videos_downloaded` to `4` |
 | Captions hidden behind TikTok UI | raise `caption_margin_v` to `500` |
+| Captions too big / too small | `caption_size` (150 = MrBeast look, ~110 = calmer) |
+| Want 2-3 words per card | `caption_words_per_card: 2` |
+| Want the old two-line block | `caption_style: classic` |
 | Want 30s clips instead of 60s | `clip_length_sec: 30` |
 
 Commit and push after any change; the next run picks it up:
@@ -303,6 +343,8 @@ without a long run. Output lands in `output\<today>\`.
 | Run fails at "Persist dedupe state" | Repo not writable | Redo Step 4, or Settings → Branches → unprotect `main` |
 | Private repo, actions disabled | Out of minutes/storage | Make repo public, or set `retention-days: 1` |
 | Clips look zoomed | `blur_pad` crops the sides | Set `render.layout: fit` (letterboxed) |
+| Captions look like Bangers, not Komika Axis | Font not found on this PC | Redo **Step 8** — the file must be `C:\Users\Amin\clipforge\fonts\Komika Axis.ttf` |
+| Keywords are not green | `keyword_color` edited | Keep `keyword_color: "&H00FF00&"` (ASS is BGR) |
 | `fatal: not a git repository` | Ran git in wrong folder | `cd` into `core-clip-pipeline` first |
 
 ### Plan B: self-hosted runner — **this is the live setup**
@@ -314,6 +356,7 @@ You do not need to do anything here. This is what is already running on your PC.
 | Actions runner `amin-desktop` | `C:\Users\Amin\actions-runner` |
 | Auto-start at logon | `…\Startup\GitHubActionsRunner.vbs` |
 | ffmpeg + ffprobe | `C:\Users\Amin\clipforge\ffmpeg\bin` |
+| Caption font (Komika Axis) | `C:\Users\Amin\clipforge\fonts` |
 | Workflow target | `runs-on: [self-hosted, Windows, X64]` |
 
 Why: YouTube blocks GitHub's datacenter IPs with *"Sign in to confirm you're not a bot"*.
@@ -359,7 +402,8 @@ cd C:\Users\Amin\actions-runner
   → downloads up to 6 videos, grabs auto-captions
   → scores every 60s window (loudness, hooks, laughter, speech)
   → cuts the best 10 non-repeating moments, renders 1080x1920
-  → burns captions, normalises audio to -14 LUFS
+  → burns MrBeast-style captions (one-word pops, green keywords)
+  → normalises audio to -14 LUFS
   → writes per-platform captions + UPLOAD.txt
   → publishes release (`clips-N`) + artifact, saves dedupe memory
 ```

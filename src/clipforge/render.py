@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -118,6 +119,185 @@ def _escape_ass(text: str) -> str:
     return text.replace("\\", "\\\\").replace("{", "(").replace("}", ")").strip()
 
 
+# --------------------------------------------------------------- caption fonts
+
+FONT_DIR_ENV = "CLIPFORGE_FONTS"
+BUILTIN_FONT_DIR = Path(__file__).resolve().parents[2] / "assets" / "fonts"
+
+
+def _font_dirs(cfg: Render) -> list[Path]:
+    candidates: list[Path] = []
+    if cfg.caption_font_dir:
+        candidates.append(Path(cfg.caption_font_dir).expanduser())
+    env = os.environ.get(FONT_DIR_ENV, "")
+    if env:
+        candidates.append(Path(env).expanduser())
+    candidates.append(Path.home() / "clipforge" / "fonts")
+    candidates.append(BUILTIN_FONT_DIR)
+    return [d for d in candidates if d.is_dir()]
+
+
+def _find_font(family: str, dirs: list[Path]) -> Path | None:
+    wanted = re.sub(r"[^a-z0-9]", "", family.lower())
+    if not wanted:
+        return None
+    for directory in dirs:
+        for entry in sorted(directory.iterdir()):
+            if entry.suffix.lower() not in (".ttf", ".otf"):
+                continue
+            if re.sub(r"[^a-z0-9]", "", entry.stem.lower()).startswith(wanted):
+                return entry
+    return None
+
+
+def resolve_font(cfg: Render) -> tuple[str, Path | None]:
+    """The requested family if it is on disk, otherwise the bundled OFL fallback.
+
+    Komika Axis is free for personal use only, so it is not in this repo. Drop the
+    .ttf in ~/clipforge/fonts (or point caption_font_dir / CLIPFORGE_FONTS at it).
+    Bangers ships in assets/fonts under the OFL, so a fresh clone still renders.
+    """
+    dirs = _font_dirs(cfg)
+    for family in (cfg.caption_font, cfg.caption_font_fallback):
+        if not family:
+            continue
+        found = _find_font(family, dirs)
+        if found:
+            return family, found
+    return cfg.caption_font, None
+
+
+# ------------------------------------------------------------ caption styling
+
+# Painted green. Deliberately short: highlight everything and nothing stands out.
+EMPHASIS_WORDS = frozenset({
+    "never", "nothing", "nobody", "everything", "everyone", "anything", "anyone",
+    "craziest", "crazy", "insane", "wildest", "wild", "best", "worst", "biggest",
+    "smallest", "first", "last", "only", "most", "least", "literally", "actually",
+    "really", "huge", "massive", "million", "billion", "thousand", "hundred",
+    "dollars", "money", "rich", "broke", "free", "won", "lost", "dead", "killed",
+    "died", "banned", "fired", "arrested", "illegal", "secret", "impossible",
+    "unbelievable", "unreal", "always", "stop", "wait", "look", "watch", "help",
+    "please", "exposed", "caught", "lying", "never", "zero", "record",
+})
+
+STOPWORDS = frozenset({
+    "the", "a", "an", "and", "or", "but", "if", "then", "that", "this", "these",
+    "those", "is", "are", "was", "were", "be", "been", "being", "to", "of", "in",
+    "on", "at", "for", "with", "from", "by", "as", "it", "its", "his", "her",
+    "their", "our", "your", "my", "me", "him", "them", "us", "you", "i", "he",
+    "she", "we", "they", "do", "does", "did", "have", "has", "had", "will",
+    "would", "can", "could", "should", "just", "like", "so", "yeah", "oh", "uh",
+    "um", "okay", "ok", "right", "well", "get", "got", "go", "going", "know",
+    "think", "there", "here", "what", "when", "where", "who", "how",
+})
+
+RESET_TAGS = "\\c&H00FFFFFF&\\3c&H00000000&"
+
+
+def _keyword_indexes(words: list[str]) -> set[int]:
+    bare = [re.sub(r"[^\w']", "", w).lower() for w in words]
+    marked = {i for i, b in enumerate(bare) if b in EMPHASIS_WORDS}
+    longest = max(
+        ((len(b), i) for i, b in enumerate(bare) if len(b) >= 6 and b not in STOPWORDS),
+        default=(0, -1),
+    )
+    if longest[0] >= 6:
+        marked.add(longest[1])
+
+    limit = max(1, len(words) // 2)
+    if len(marked) > limit:
+        keep = [i for i in sorted(marked) if bare[i] in EMPHASIS_WORDS][:limit]
+        marked = set(keep) or set(sorted(marked)[:limit])
+    return marked
+
+
+def _fit_font_size(cfg: Render, word: str) -> int | None:
+    """Shrink only when a single word would run off the 1080px frame."""
+    estimated = 0.62 * cfg.caption_size * len(word)
+    limit = cfg.width * 0.92
+    if estimated <= limit:
+        return None
+    return max(40, int(cfg.caption_size * limit / estimated))
+
+
+def _pop_tags(cfg: Render) -> str:
+    if cfg.caption_pop_scale <= 100 or cfg.caption_pop_ms <= 0:
+        return ""
+    return (
+        f"\\fscx{cfg.caption_pop_scale}\\fscy{cfg.caption_pop_scale}"
+        f"\\t(0,{cfg.caption_pop_ms},\\fscx100\\fscy100)"
+    )
+
+
+def _keyword_tags(cfg: Render) -> str:
+    return f"\\c{cfg.keyword_color}\\3c{cfg.keyword_outline}"
+
+
+def _word_events(cue: Cue, clip_start: float, clip_dur: float, cfg: Render) -> list[tuple[float, float, str]]:
+    """MrBeast-style: one word (or a short card) at a time, popping in.
+
+    Auto-captions only carry phrase timings, so word durations are split by
+    character weight inside each cue. Good enough for 1-3 word cards.
+    """
+    text = strip_censored(cue.text)
+    if cfg.caption_uppercase:
+        text = text.upper()
+    words = text.split()
+    if not words:
+        return []
+
+    start = max(0.0, cue.start - clip_start)
+    end = min(clip_dur, cue.end - clip_start)
+    if end <= start:
+        return []
+
+    keywords = _keyword_indexes(words)
+    per_card = max(1, cfg.caption_words_per_card)
+    groups: list[list[tuple[str, bool]]] = [
+        [(w, (i + j) in keywords) for j, w in enumerate(words[i:i + per_card])]
+        for i in range(0, len(words), per_card)
+    ]
+
+    weights = [sum(len(w) + 2 for w, _ in group) for group in groups]
+    total = sum(weights) or 1
+    span = end - start
+    events: list[tuple[float, float, str]] = []
+    cursor = start
+
+    for index, group in enumerate(groups):
+        if index == len(groups) - 1:
+            card_end = end
+        else:
+            card_end = min(end, cursor + max(0.10, span * weights[index] / total))
+        if card_end - cursor < 0.05:
+            break
+
+        if len(group) == 1:
+            word, is_keyword = group[0]
+            tags = _pop_tags(cfg)
+            if is_keyword:
+                tags += _keyword_tags(cfg)
+            size = _fit_font_size(cfg, word)
+            if size:
+                tags += f"\\fs{size}"
+            body = f"{{{tags}}}{_escape_ass(word)}" if tags else _escape_ass(word)
+        else:
+            pieces = []
+            for word, is_keyword in group:
+                if is_keyword:
+                    pieces.append(f"{{{_keyword_tags(cfg)}}}{_escape_ass(word)}{{{RESET_TAGS}}}")
+                else:
+                    pieces.append(_escape_ass(word))
+            pop = _pop_tags(cfg)
+            body = f"{{{pop}}}{' '.join(pieces)}" if pop else " ".join(pieces)
+
+        events.append((cursor, card_end, body))
+        cursor = card_end
+
+    return events
+
+
 def _wrap(text: str, max_chars: int) -> list[str]:
     lines: list[str] = []
     current = ""
@@ -163,31 +343,52 @@ def _cue_events(cue: Cue, clip_start: float, clip_dur: float, cfg: Render) -> li
     return events
 
 
-def write_ass(cues: list[Cue], clip_start: float, clip_dur: float, path: Path, cfg: Render) -> Path:
+def write_ass(
+    cues: list[Cue],
+    clip_start: float,
+    clip_dur: float,
+    path: Path,
+    cfg: Render,
+    family: str | None = None,
+) -> Path:
+    font = family or cfg.caption_font
+    bold = -1 if cfg.caption_bold else 0
     header = (
         "[Script Info]\n"
         "ScriptType: v4.00+\n"
         f"PlayResX: {cfg.width}\n"
         f"PlayResY: {cfg.height}\n"
-        "WrapStyle: 2\n"
+        "WrapStyle: 0\n"
         "ScaledBorderAndShadow: yes\n"
         "YCbCr Matrix: TV.709\n\n"
         "[V4+ Styles]\n"
         "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, "
         "Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, "
         "Shadow, Alignment, MarginL, MarginR, MarginV, Encoding\n"
-        f"Style: Cap,{cfg.caption_font},{cfg.caption_size},&H00FFFFFF,&H000000FF,&H00000000,&H64000000,"
-        f"-1,0,0,0,100,100,0,0,1,{cfg.caption_outline},2,2,90,90,{cfg.caption_margin_v},1\n\n"
+        f"Style: Cap,{font},{cfg.caption_size},&H00FFFFFF,&H000000FF,&H00000000,&H64000000,"
+        f"{bold},0,0,0,100,100,0,0,1,{cfg.caption_outline},{cfg.caption_shadow},2,"
+        f"60,60,{cfg.caption_margin_v},1\n\n"
         "[Events]\n"
         "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text\n"
     )
 
     rows: list[str] = []
+    last_end = 0.0
     for cue in cues_between(cues, clip_start, clip_start + clip_dur):
         if cue.kind != "speech":
             continue
-        for start, end, body in _cue_events(cue, clip_start, clip_dur, cfg):
+        events = (
+            _word_events(cue, clip_start, clip_dur, cfg)
+            if cfg.caption_style == "mrbeast"
+            else _cue_events(cue, clip_start, clip_dur, cfg)
+        )
+        for start, end, body in events:
+            # Cues can overlap in auto-captions; never let two cards stack.
+            start = max(start, last_end)
+            if end - start < 0.05:
+                continue
             rows.append(f"Dialogue: 0,{_ass_time(start)},{_ass_time(end)},Cap,,0,0,0,,{body}")
+            last_end = end
 
     path.write_text(header + "\n".join(rows) + "\n", encoding="utf-8")
     return path
@@ -196,7 +397,7 @@ def write_ass(cues: list[Cue], clip_start: float, clip_dur: float, path: Path, c
 # ------------------------------------------------------------------- render
 
 
-def _video_graph(cfg: Render, ass_name: str | None) -> str:
+def _video_graph(cfg: Render, ass_name: str | None, fonts_subdir: str | None = None) -> str:
     width, height = cfg.width, cfg.height
     if cfg.layout == "center_crop":
         base = f"[0:v]scale={width}:{height}:force_original_aspect_ratio=increase,crop={width}:{height},setsar=1[base]"
@@ -214,7 +415,12 @@ def _video_graph(cfg: Render, ass_name: str | None) -> str:
             f"[bg][fg]overlay=(W-w)/2:(H-h)/2:shortest=1,setsar=1[base]"
         )
 
-    tail = "subtitles=" + ass_name if ass_name else "null"
+    if ass_name:
+        tail = f"subtitles={ass_name}"
+        if fonts_subdir:
+            tail += f":fontsdir={fonts_subdir}"
+    else:
+        tail = "null"
     return f"{base};[base]{tail},format=yuv420p[v]"
 
 
@@ -241,11 +447,22 @@ def render_clip(
     work.mkdir(parents=True, exist_ok=True)
 
     ass_name = None
+    fonts_subdir = None
     if cfg.burn_captions and cues:
-        ass_path = write_ass(cues, start, duration, work / f"{dst.stem}.ass", cfg)
+        family, font_path = resolve_font(cfg)
+        ass_path = write_ass(cues, start, duration, work / f"{dst.stem}.ass", cfg, family=family)
         ass_name = ass_path.name
+        if font_path:
+            # libass resolves the family through fontconfig; give it a private dir
+            # instead of requiring a system-wide font install.
+            fonts_dir = work / "fonts"
+            fonts_dir.mkdir(parents=True, exist_ok=True)
+            target = fonts_dir / font_path.name
+            if not target.exists():
+                shutil.copy2(font_path, target)
+            fonts_subdir = "fonts"
 
-    graph = _video_graph(cfg, ass_name)
+    graph = _video_graph(cfg, ass_name, fonts_subdir)
     audio_chain = f"[0:a]highpass=f=70,loudnorm=I={cfg.audio_lufs}:TP=-1.5:LRA=11[a]"
     if not info["has_audio"]:
         audio_chain = "[1:a]anull[a]"
