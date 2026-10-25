@@ -68,10 +68,16 @@ Offline check of the whole cut/render path, no YouTube involved:
 
 ## Deploy so it runs while you're away
 
+The live setup is the **self-hosted runner on this PC** (see
+[SETUP.md → Plan B](SETUP.md#plan-b-self-hosted-runner--this-is-the-live-setup)):
+YouTube blocks GitHub-hosted machines, so the job runs on your own connection.
+
+If you ever rebuild from scratch:
+
 1. Create a GitHub repo and push this folder.
 2. Repo **Settings -> Actions -> General -> Workflow permissions** -> *Read and write*.
    That lets the job publish a release and save its dedupe state.
-3. Optional but recommended for cloud runs: add secret **`YT_COOKIES_B64`** (see below).
+3. Register a self-hosted runner on the PC (see SETUP.md Plan B).
 4. Test it: **Actions -> Daily clips -> Run workflow** with `dry_run` checked.
    Then run it unchecked for a real batch.
 
@@ -79,7 +85,7 @@ It then runs every day at 13:00 UTC (`0 13 * * *` in
 `.github/workflows/daily-clips.yml`). Change that line to your posting time.
 
 Each run publishes:
-- an **artifact** with everything (14-day retention), and
+- an **artifact** with everything (3-day retention), and
 - a **release** with permanent download links (`clips-<run number>`).
 
 Then you download, and post. ~10 minutes of work instead of hours.

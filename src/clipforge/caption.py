@@ -59,6 +59,16 @@ _FILLER_PREFIX = re.compile(
     re.IGNORECASE,
 )
 
+# YouTube's auto-captions censor swearing as "[ __ ]". It looks like a glitch on screen.
+CENSORED = re.compile(r"\[\s*_+\s*\]")
+
+
+def strip_censored(text: str) -> str:
+    text = CENSORED.sub("", text)
+    text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"\s+([,.;:!?])", r"\1", text)
+    return text.strip(" ,;:-")
+
 
 def _words(text: str) -> list[str]:
     return [re.sub(r"[^\w']", "", w).lower() for w in text.split()]
@@ -102,7 +112,7 @@ def _tidy(text: str) -> str:
 
 def _clip_text(cues: list[Cue], start: float, end: float, limit: int = 120) -> str:
     text = " ".join(c.text for c in cues_between(cues, start, end) if c.kind == "speech")
-    return _tidy(text)[:limit].strip()
+    return _tidy(strip_censored(text))[:limit].strip()
 
 
 def _pick_hook(text: str) -> str:
@@ -118,7 +128,10 @@ def _pick_hook(text: str) -> str:
     hook_words = ("no way", "what the", "bro what", "wait what", "look at", "chat",
                   "oh my god", "are you serious", "i can't believe", "let's go")
     strong = [s for s in usable if any(word in s.lower() for word in hook_words)]
-    pick = strong[0] if strong else usable[0]
+    pool = strong or usable
+    # "He's down there" is a weak title; prefer a clause with something to read.
+    substantial = [s for s in pool if 25 <= len(s) <= 90]
+    pick = (substantial or pool)[0]
     return pick[:90].rstrip(" .,")
 
 

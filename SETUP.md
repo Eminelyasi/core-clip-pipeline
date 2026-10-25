@@ -5,6 +5,11 @@ if it goes wrong.
 
 Total time: ~20 minutes. After that it runs by itself every morning.
 
+> **Status: setup is finished.** The runner, ffmpeg, repo, secrets and workflow are all
+> installed and a full batch has run successfully. You can skip to
+> **[Your part, every day](#your-part-every-day-10-minutes)** — the steps below are kept
+> for reference and for rebuilding on another PC.
+
 Paths assume the project stays where it is:
 
 ```
@@ -300,39 +305,83 @@ without a long run. Output lands in `output\<today>\`.
 | Clips look zoomed | `blur_pad` crops the sides | Set `render.layout: fit` (letterboxed) |
 | `fatal: not a git repository` | Ran git in wrong folder | `cd` into `core-clip-pipeline` first |
 
-### Plan B: self-hosted runner (if YouTube keeps blocking GitHub)
+### Plan B: self-hosted runner — **this is the live setup**
 
-Runs on your own PC, so it uses your home IP and needs no cookies. Your PC must be on.
-Verified working from your machine, so this is the guaranteed path.
+You do not need to do anything here. This is what is already running on your PC.
 
-1. Repo → **Settings → Actions → Runners → New self-hosted runner** → **Windows x64**
-2. Run the four commands it shows in PowerShell (download, `config.cmd --url ... --token ...`,
-   then `.\run.cmd` to test)
-3. Install it as a service so it survives reboots (from the runner folder, in an **admin**
-   PowerShell): `.\svc.cmd install` then `.\svc.cmd start`
-4. In `daily-clips.yml`, change `runs-on: ubuntu-latest` to `runs-on: [self-hosted, Windows]`
-5. Delete the `Install ffmpeg` step (Windows has no working `apt-get`) and
-   `winget install Gyan.FFmpeg` on the PC once
-6. Keep the cookies step — harmless — or delete the `YT_COOKIES_B64` secret
+| Thing | Where |
+| --- | --- |
+| Actions runner `amin-desktop` | `C:\Users\Amin\actions-runner` |
+| Auto-start at logon | `…\Startup\GitHubActionsRunner.vbs` |
+| ffmpeg + ffprobe | `C:\Users\Amin\clipforge\ffmpeg\bin` |
+| Workflow target | `runs-on: [self-hosted, Windows, X64]` |
 
-Wake-on-schedule: in Windows **Task Scheduler**, the pipeline only runs while the PC is
-awake. Either keep it plugged in and set *Power & sleep → Sleep: Never* when charging, or
-change the cron in `daily-clips.yml` to a time you are usually using the machine.
+Why: YouTube blocks GitHub's datacenter IPs with *"Sign in to confirm you're not a bot"*.
+A runner on your home connection uses your normal IP, so downloads work.
+
+**The three rules that keep it working**
+
+1. The PC must be **on and logged in** around 13:00 UTC. The runner starts by itself at
+   logon, so a restart is harmless — a powered-off PC is not.
+2. If the PC is off at 13:00, GitHub keeps the job **queued** and it starts on its own
+   when the PC comes back. Nothing is lost, it just runs later that day.
+3. Set **Power & sleep → Sleep: Never** while plugged in, or the PC can fall asleep
+   mid-render.
+
+**Is it alive?** One line back means healthy:
+
+```powershell
+Get-Process Runner.Listener
+```
+
+If that prints nothing, restart it:
+
+```powershell
+wscript.exe "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup\GitHubActionsRunner.vbs"
+```
+
+Re-register only if you ever delete the runner on GitHub
+(**Settings → Actions → Runners → New self-hosted runner → Windows x64** gives the token):
+
+```powershell
+cd C:\Users\Amin\actions-runner
+.\config.cmd --unattended --url https://github.com/Eminelyasi/core-clip-pipeline --token <TOKEN> --name amin-desktop --labels clipforge --replace
+.\run.cmd
+```
 
 ---
 
 ## What runs every morning
 
 ```
-13:00 UTC (09:00 New York)  →  Actions wakes up
+13:00 UTC  →  Actions wakes the job on your PC (self-hosted runner)
   → scans 8 channels, ranks newest uploads by views + freshness
   → downloads up to 6 videos, grabs auto-captions
   → scores every 60s window (loudness, hooks, laughter, speech)
   → cuts the best 10 non-repeating moments, renders 1080x1920
   → burns captions, normalises audio to -14 LUFS
   → writes per-platform captions + UPLOAD.txt
-  → publishes release + artifact
-  → saves dedupe memory so tomorrow never repeats today
+  → publishes release (`clips-N`) + artifact, saves dedupe memory
 ```
 
-Change the schedule line in `.github/workflows/daily-clips.yml` to move it.
+13:00 UTC is 09:00 in New York in summer, 08:00 in winter (cron does not follow
+daylight saving). Change the `cron:` line in `.github/workflows/daily-clips.yml` to move it.
+
+---
+
+## Your part, every day (~10 minutes)
+
+1. Open **https://github.com/Eminelyasi/core-clip-pipeline/actions** and click the newest
+   **Daily clips** run (green check).
+2. Scroll to **Artifacts** and click **`clips-N`** — one zip with everything (~260 MB).
+3. Unzip it. You get `2026-10-26\clips\` (10 mp4) and `2026-10-26\captions\` and
+   `UPLOAD.txt`.
+4. Open **`UPLOAD.txt`**. Clips are listed best-first with score, hook and source.
+5. For each clip: upload the mp4, open its `*.tiktok.txt` (or `*.youtube_shorts.txt`,
+   `*.instagram_reels.txt`) and paste the text as the caption. Post.
+
+The **Releases** page keeps a permanent copy if the artifact has expired:
+https://github.com/Eminelyasi/core-clip-pipeline/releases
+
+Nothing posts automatically — that was the deal. Upload is yours.
+

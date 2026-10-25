@@ -12,6 +12,7 @@ import numpy as np
 
 from .settings import Render
 from .transcript import Cue, cues_between
+from .caption import strip_censored
 
 
 class FFmpegError(RuntimeError):
@@ -133,7 +134,8 @@ def _wrap(text: str, max_chars: int) -> list[str]:
 
 def _cue_events(cue: Cue, clip_start: float, clip_dur: float, cfg: Render) -> list[tuple[float, float, str]]:
     """Turn one cue into 1-2 line caption cards, timed by character share."""
-    text = cue.text.upper() if cfg.caption_uppercase else cue.text
+    text = strip_censored(cue.text)
+    text = text.upper() if cfg.caption_uppercase else text
     lines = _wrap(text, cfg.max_chars_per_line)
     if not lines:
         return []
