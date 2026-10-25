@@ -69,6 +69,10 @@ You land on a page titled *"Quick setup"*. Keep it open — you need the URL fro
 
 ## Step 3 — Push the project
 
+> **Already done** (2026-10-25). The project is pushed to
+> `https://github.com/Eminelyasi/core-clip-pipeline` and the workflow is active.
+> Skip to **Step 4**. Keep this section only for rebuilding from scratch.
+
 Copy this block, replace `YOURUSERNAME` with your GitHub username, and run it:
 
 ```powershell
