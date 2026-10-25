@@ -80,11 +80,96 @@
         }
       ],
       "last_run": "2026-10-25T17:12:23+00:00"
+    },
+    "t7NqvQ9uPf0": {
+      "title": "CORE HORROR HIDE AND SEEK",
+      "clips": [
+        {
+          "start": 411.79,
+          "end": 471.79,
+          "file": "clips/01_core_t7NqvQ9uPf0_0411.mp4"
+        },
+        {
+          "start": 2157.22,
+          "end": 2217.22,
+          "file": "clips/02_core_t7NqvQ9uPf0_2157.mp4"
+        }
+      ],
+      "last_run": "2026-10-25T17:17:55+00:00"
+    },
+    "izjoU38hbrI": {
+      "title": "I Tried Building With Marlon..",
+      "clips": [
+        {
+          "start": 102.15,
+          "end": 162.15,
+          "file": "clips/03_stable-ronaldo_izjoU38hbrI_0102.mp4"
+        },
+        {
+          "start": 234.2,
+          "end": 294.2,
+          "file": "clips/04_stable-ronaldo_izjoU38hbrI_0234.mp4"
+        }
+      ],
+      "last_run": "2026-10-25T17:20:51+00:00"
+    },
+    "EN1AqgiHQGo": {
+      "title": "CORE Meets #1 Ranked Magician In The World!",
+      "clips": [
+        {
+          "start": 4506.85,
+          "end": 4566.85,
+          "file": "clips/05_jasontheween_EN1AqgiHQGo_4506.mp4"
+        },
+        {
+          "start": 4901.93,
+          "end": 4961.93,
+          "file": "clips/06_jasontheween_EN1AqgiHQGo_4901.mp4"
+        }
+      ],
+      "last_run": "2026-10-25T17:23:46+00:00"
+    },
+    "mhNFmzGzVZE": {
+      "title": "WAGERING AGAINST LACY ON 2K27",
+      "clips": [
+        {
+          "start": 1686.09,
+          "end": 1746.09,
+          "file": "clips/07_marlon_mhNFmzGzVZE_1686.mp4"
+        },
+        {
+          "start": 1736.59,
+          "end": 1796.59,
+          "file": "clips/08_marlon_mhNFmzGzVZE_1736.mp4"
+        }
+      ],
+      "last_run": "2026-10-25T17:31:08+00:00"
+    },
+    "cf-8r2LwLok": {
+      "title": "A DAY IN THE LIFE AT THE CORE HOUSE!",
+      "clips": [
+        {
+          "start": 551.77,
+          "end": 611.77,
+          "file": "clips/09_lacy_cf-8r2LwLok_0551.mp4"
+        },
+        {
+          "start": 712.64,
+          "end": 772.64,
+          "file": "clips/10_lacy_cf-8r2LwLok_0712.mp4"
+        }
+      ],
+      "last_run": "2026-10-25T17:32:48+00:00"
     }
   },
   "runs": [
     {
       "at": "2026-10-25T17:12:23+00:00",
+      "produced": 10,
+      "requested": 10
+    },
+    {
+      "at": "2026-10-25T17:32:48+00:00",
       "produced": 10,
       "requested": 10
     }
