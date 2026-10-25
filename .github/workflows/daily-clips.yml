@@ -32,6 +32,25 @@ jobs:
       YT_COOKIES_B64: ${{ secrets.YT_COOKIES_B64 }}
 
     steps:
+      # Must run before checkout: without git on PATH, actions/checkout falls back
+      # to downloading a tarball, which leaves no .git and breaks the state commit.
+      - name: Put git on PATH
+        shell: powershell
+        run: |
+          if (Get-Command git -ErrorAction SilentlyContinue) {
+            Write-Output "git already on PATH"
+            exit 0
+          }
+          foreach ($candidate in @("C:\Program Files\Git\cmd", "C:\Program Files (x86)\Git\cmd")) {
+            if (Test-Path (Join-Path $candidate "git.exe")) {
+              $candidate | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+              Write-Output "git dir added for this job: $candidate"
+              exit 0
+            }
+          }
+          Write-Error "git not found. Install Git for Windows and re-run."
+          exit 1
+
       - uses: actions/checkout@v7
 
       - name: Locate ffmpeg and git
