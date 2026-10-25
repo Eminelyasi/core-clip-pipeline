@@ -51,15 +51,66 @@ class ClipCaption:
         return self.platform
 
 
+# Auto-captions arrive lowercase, unpunctuated and stuttery ("so just , so just").
+# These cleanups only touch the caption text, never the audio or the burned subs.
+_FILLER_PREFIX = re.compile(
+    r"^(?:okay|ok|yeah|yea|yep|uh|uhh|um|umm|erm|hmm|so|and|but|like|well|just|"
+    r"i mean|you know|to be honest|honestly|basically|literally|right)[\s,]+",
+    re.IGNORECASE,
+)
+
+
+def _words(text: str) -> list[str]:
+    return [re.sub(r"[^\w']", "", w).lower() for w in text.split()]
+
+
+def _collapse_repeats(text: str) -> str:
+    """Drop an immediately repeated phrase: "no way no way he did" -> "no way he did"."""
+    words = text.split()
+    out: list[str] = []
+    i = 0
+    while i < len(words):
+        collapsed = False
+        for size in (4, 3, 2, 1):
+            if i + 2 * size > len(words):
+                continue
+            first, second = _words(" ".join(words[i:i + size])), _words(" ".join(words[i + size:i + 2 * size]))
+            if first == second and any(first):
+                out.extend(words[i:i + size])
+                i += 2 * size
+                collapsed = True
+                break
+        if not collapsed:
+            out.append(words[i])
+            i += 1
+    return " ".join(out)
+
+
+def _tidy(text: str) -> str:
+    text = re.sub(r"\s+", " ", text)
+    text = re.sub(r"\s+([,.;:!?])", r"\1", text)
+    text = _collapse_repeats(text)
+    for _ in range(6):
+        stripped = _FILLER_PREFIX.sub("", text)
+        if stripped == text:
+            break
+        text = stripped
+    text = text.strip(" ,;:-")
+    text = re.sub(r"\bi\b", "I", text)
+    return text[:1].upper() + text[1:] if text else text
+
+
 def _clip_text(cues: list[Cue], start: float, end: float, limit: int = 120) -> str:
     text = " ".join(c.text for c in cues_between(cues, start, end) if c.kind == "speech")
-    text = re.sub(r"\s+", " ", text).strip()
-    return text[:limit].strip()
+    return _tidy(text)[:limit].strip()
 
 
 def _pick_hook(text: str) -> str:
     """A real opening line, preferring an actual hook over the shortest phrase."""
     sentences = [s.strip() for s in re.split(r"(?<=[.!?])\s+", text) if s.strip()]
+    # Auto-captions often have no sentence punctuation at all: fall back to clauses.
+    if len(sentences) == 1 and len(sentences[0]) > 90:
+        sentences = [s.strip() for s in re.split(r",| - | \u2014 ", text) if s.strip()]
     usable = [s for s in sentences if len(s) >= 15 and _is_safe(s)]
     if not usable:
         return ""
