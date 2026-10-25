@@ -29,9 +29,9 @@ jobs:
       YT_COOKIES_B64: ${{ secrets.YT_COOKIES_B64 }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -102,8 +102,8 @@ jobs:
           ls -R output || true
 
       - name: Upload clips as artifact
-        if: always()
-        uses: actions/upload-artifact@v4
+        if: always() && inputs.dry_run != true
+        uses: actions/upload-artifact@v7
         with:
           name: clips-${{ github.run_number }}
           path: output/
@@ -113,8 +113,8 @@ jobs:
           if-no-files-found: warn
 
       - name: Publish release (permanent download page)
-        if: success()
-        uses: softprops/action-gh-release@v2
+        if: success() && inputs.dry_run != true
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: clips-${{ github.run_number }}
           name: "Clips ${{ github.run_number }}"
