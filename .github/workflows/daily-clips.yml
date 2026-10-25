@@ -1,5 +1,8 @@
 name: Daily clips
 
+# Runs on the self-hosted Windows runner so YouTube sees a residential IP.
+# GitHub-hosted runners get "Sign in to confirm you're not a bot" on every download.
+
 on:
   schedule:
     # 13:00 UTC = 09:00 New York (EDT). Adjust to your posting time.
@@ -20,7 +23,7 @@ permissions:
 
 jobs:
   clip:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Windows, X64]
     timeout-minutes: 240
 
     env:
@@ -31,75 +34,82 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v7
-        with:
-          python-version: "3.12"
-          cache: pip
-
-      - name: Install ffmpeg
-        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+      - name: Locate ffmpeg
+        shell: powershell
+        run: |
+          $dir = Join-Path $env:USERPROFILE "clipforge\ffmpeg\bin"
+          if (-not (Test-Path (Join-Path $dir "ffmpeg.exe"))) {
+            $found = Get-Command ffmpeg -ErrorAction SilentlyContinue
+            if ($found) {
+              $dir = Split-Path $found.Source
+            } else {
+              Write-Error "ffmpeg not found. Run SETUP.md Plan B step 5 (winget install Gyan.FFmpeg)."
+              exit 1
+            }
+          }
+          $dir | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          & (Join-Path $dir "ffmpeg.exe") -version | Select-Object -First 1
 
       - name: Install Python deps
-        run: pip install -r requirements.txt
+        shell: powershell
+        run: |
+          python -m pip install --upgrade pip --quiet
+          python -m pip install -r requirements.txt --quiet
+          python --version
 
       - name: Restore YouTube cookies
         if: env.YT_COOKIES_B64 != ''
-        shell: bash
+        shell: powershell
         run: |
-          set -uo pipefail
-          # A secret is single-line, but strip stray whitespace/quotes from manual pastes.
-          printf '%s' "$YT_COOKIES_B64" | tr -d ' \t\r\n"' > /tmp/cookies.b64
-          chars=$(wc -c < /tmp/cookies.b64)
-          echo "secret payload: ${chars} characters"
+          $raw = $env:YT_COOKIES_B64
+          $clean = ($raw -replace '[\s"'']', '')
+          Write-Output "secret payload: $($clean.Length) characters"
 
-          if grep -qE 'youtube\.com|Netscape' /tmp/cookies.b64; then
-            echo "::error::YT_COOKIES_B64 contains the raw cookies.txt text, not base64."
-            echo "Fix: run tools/make_cookies_secret.ps1 locally, then paste its clipboard value into the secret."
+          if ($clean -match 'youtube\.com|Netscape') {
+            Write-Error "YT_COOKIES_B64 contains the raw cookies.txt text, not base64. Run tools/make_cookies_secret.ps1 and paste its clipboard value."
             exit 1
-          fi
-
-          if [ -n "$(tr -d 'A-Za-z0-9+/=' < /tmp/cookies.b64)" ]; then
-            echo "::error::YT_COOKIES_B64 has characters that are not valid base64 (A-Z a-z 0-9 + / =)."
-            echo "Fix: re-copy the value from tools/make_cookies_secret.ps1 and paste it whole."
+          }
+          if ($clean -notmatch '^[A-Za-z0-9+/=]+$') {
+            Write-Error "YT_COOKIES_B64 has characters that are not valid base64."
             exit 1
-          fi
-
-          if ! base64 -d /tmp/cookies.b64 > cookies.txt 2> /tmp/b64.err; then
-            echo "::error::YT_COOKIES_B64 is not decodable base64 (truncated or mangled paste)."
-            echo "decoder: $(cat /tmp/b64.err)"
+          }
+          try {
+            $bytes = [Convert]::FromBase64String($clean)
+          } catch {
+            Write-Error "YT_COOKIES_B64 is not decodable base64 (truncated or mangled paste)."
             exit 1
-          fi
-
-          bytes=$(wc -c < cookies.txt)
-          if [ "$bytes" -lt 100 ]; then
-            echo "::error::decoded cookies.txt is only ${bytes} bytes, so the paste was truncated."
-            echo "Fix: re-run tools/make_cookies_secret.ps1 and paste the whole clipboard value."
+          }
+          if ($bytes.Length -lt 100) {
+            Write-Error "decoded cookies.txt is only $($bytes.Length) bytes, so the paste was truncated."
             exit 1
-          fi
-
-          if ! grep -qi 'youtube\.com' cookies.txt; then
-            echo "::error::decoded file has no youtube.com cookies."
-            echo "Fix: export cookies from a signed-in youtube.com tab."
+          }
+          [IO.File]::WriteAllBytes((Join-Path $PWD "cookies.txt"), $bytes)
+          $text = [Text.Encoding]::UTF8.GetString($bytes)
+          $rows = ([regex]::Matches($text, 'youtube\.com')).Count
+          if ($rows -eq 0) {
+            Write-Error "decoded file has no youtube.com cookies. Export from a signed-in youtube.com tab."
             exit 1
-          fi
-
-          echo "cookies.txt ready: ${bytes} bytes, $(grep -ci 'youtube\.com' cookies.txt) youtube.com rows"
+          }
+          Write-Output "cookies.txt ready: $($bytes.Length) bytes, $rows youtube.com rows"
 
       - name: Doctor
+        shell: powershell
         run: python -m clipforge doctor
 
       - name: Build today's clips
+        shell: powershell
         run: |
-          if [ "${{ inputs.dry_run }}" = "true" ]; then
+          if ("${{ inputs.dry_run }}" -eq "true") {
             python -m clipforge run --dry-run
-          else
+          } else {
             python -m clipforge run
-          fi
+          }
 
       - name: Show output
         if: always()
+        shell: powershell
         run: |
-          ls -R output || true
+          if (Test-Path output) { Get-ChildItem -Recurse output | Select-Object FullName, Length } else { Write-Output "no output directory" }
 
       - name: Upload clips as artifact
         if: always() && inputs.dry_run != true
@@ -108,7 +118,6 @@ jobs:
           name: clips-${{ github.run_number }}
           path: output/
           # 3 days keeps storage small; the Release below is permanent.
-          # On a private repo set this to 1 (500 MB free tier).
           retention-days: 3
           if-no-files-found: warn
 
@@ -131,11 +140,15 @@ jobs:
 
       - name: Persist dedupe state
         if: success()
+        shell: powershell
         run: |
-          if [ -n "$(git status --porcelain state/processed.json)" ]; then
+          $status = git status --porcelain state/processed.json
+          if ($status) {
             git config user.name  "clipforge-bot"
             git config user.email "clipforge-bot@users.noreply.github.com"
             git add state/processed.json
             git commit -m "chore: update clip state [skip ci]"
             git push
-          fi
+          } else {
+            Write-Output "state unchanged - nothing to commit"
+          }
