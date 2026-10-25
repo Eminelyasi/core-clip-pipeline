@@ -234,11 +234,42 @@ def _keyword_tags(cfg: Render) -> str:
     return f"\\c{cfg.keyword_color}\\3c{cfg.keyword_outline}"
 
 
+def _token_spans(
+    cue: Cue,
+    words: list[str],
+    clip_start: float,
+    start: float,
+    end: float,
+    uppercase: bool,
+) -> list[tuple[float, float]] | None:
+    """Exact per-word timings from YouTube's inline stamps, if they line up.
+
+    Returns None whenever anything does not match, so the caller falls back to
+    character-weight interpolation instead of showing the wrong word at the
+    wrong time.
+    """
+    tokens = cue.tokens
+    if len(tokens) != len(words):
+        return None
+    spans: list[tuple[float, float]] = []
+    for word, (word_start, word_end, raw) in zip(words, tokens):
+        cleaned = strip_censored(raw)
+        if uppercase:
+            cleaned = cleaned.upper()
+        if cleaned != word:
+            return None
+        spans.append((max(start, word_start - clip_start), min(end, word_end - clip_start)))
+    if any(b - a < 0.04 for a, b in spans):
+        return None
+    return spans
+
+
 def _word_events(cue: Cue, clip_start: float, clip_dur: float, cfg: Render) -> list[tuple[float, float, str]]:
     """MrBeast-style: one word (or a short card) at a time, popping in.
 
-    Auto-captions only carry phrase timings, so word durations are split by
-    character weight inside each cue. Good enough for 1-3 word cards.
+    Uses YouTube's inline word timestamps when the cue has them, so every card
+    lands on the word that is actually being said. Falls back to splitting the
+    phrase by character weight when only phrase timings exist (e.g. Whisper).
     """
     text = strip_censored(cue.text)
     if cfg.caption_uppercase:
@@ -252,26 +283,46 @@ def _word_events(cue: Cue, clip_start: float, clip_dur: float, cfg: Render) -> l
     if end <= start:
         return []
 
-    keywords = _keyword_indexes(words)
     per_card = max(1, cfg.caption_words_per_card)
-    groups: list[list[tuple[str, bool]]] = [
-        [(w, (i + j) in keywords) for j, w in enumerate(words[i:i + per_card])]
-        for i in range(0, len(words), per_card)
-    ]
+    keywords = _keyword_indexes(words)
+    exact = _token_spans(cue, words, clip_start, start, end, cfg.caption_uppercase)
 
-    weights = [sum(len(w) + 2 for w, _ in group) for group in groups]
+    groups: list[tuple[list[tuple[str, bool]], float | None, float | None]] = []
+    for i in range(0, len(words), per_card):
+        chunk = words[i : i + per_card]
+        flags = [(i + j) in keywords for j in range(len(chunk))]
+        if exact:
+            group_start = exact[i][0]
+            group_end = exact[min(i + per_card, len(exact)) - 1][1]
+        else:
+            group_start = group_end = None
+        groups.append((list(zip(chunk, flags)), group_start, group_end))
+
+    weights = [sum(len(w) + 2 for w, _ in group) for group, _, _ in groups]
+    if exact:
+        # A word stays on screen until the next word starts: exact start, no
+        # flicker on the 0.07s words YouTube sometimes emits.
+        for index, (chunk, group_start, group_end) in enumerate(groups):
+            next_start = groups[index + 1][1] if index + 1 < len(groups) else None
+            if next_start is not None:
+                groups[index] = (chunk, group_start, next_start)
     total = sum(weights) or 1
     span = end - start
     events: list[tuple[float, float, str]] = []
     cursor = start
 
-    for index, group in enumerate(groups):
-        if index == len(groups) - 1:
-            card_end = end
-        else:
-            card_end = min(end, cursor + max(0.10, span * weights[index] / total))
-        if card_end - cursor < 0.05:
-            break
+    for index, (group, group_start, group_end) in enumerate(groups):
+        if group_start is None:
+            group_start = cursor
+            group_end = (
+                end
+                if index == len(groups) - 1
+                else min(end, cursor + max(0.10, span * weights[index] / total))
+            )
+        group_start = max(group_start, cursor)
+        group_end = min(max(group_end, group_start + 0.05), end)
+        if group_start >= end or group_end - group_start < 0.05:
+            continue
 
         if len(group) == 1:
             word, is_keyword = group[0]
@@ -292,8 +343,8 @@ def _word_events(cue: Cue, clip_start: float, clip_dur: float, cfg: Render) -> l
             pop = _pop_tags(cfg)
             body = f"{{{pop}}}{' '.join(pieces)}" if pop else " ".join(pieces)
 
-        events.append((cursor, card_end, body))
-        cursor = card_end
+        events.append((group_start, group_end, body))
+        cursor = group_end
 
     return events
 

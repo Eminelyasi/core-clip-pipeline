@@ -40,6 +40,10 @@ class Cue:
     end: float
     text: str
     kind: str = "speech"
+    # Optional per-word timings: (start, end, word). YouTube's auto-captions carry
+    # these inline, and the caption renderer uses them so each word card lands on
+    # the word that is actually being said.
+    tokens: tuple[tuple[float, float, str], ...] = ()
 
     @property
     def duration(self) -> float:
@@ -130,7 +134,8 @@ def _word_cues(start: float, end: float, lines: list[str]) -> list[Cue] | None:
         if not text:
             continue
         kind = _kind_of(text) or "speech"
-        cues.append(Cue(word_start, max(word_end, word_start + 0.05), text, kind))
+        span_end = max(word_end, word_start + 0.05)
+        cues.append(Cue(word_start, span_end, text, kind, ((word_start, span_end, text),)))
     return cues
 
 
@@ -219,12 +224,20 @@ def _merge(cues: list[Cue]) -> list[Cue]:
     """Glue word-level cues into readable phrases for subtitles and scoring."""
     merged: list[Cue] = []
     buffer: list[Cue] = []
+    tokens: list[tuple[float, float, str]] = []
+    every_cue_has_tokens = True
 
     def flush() -> None:
+        nonlocal every_cue_has_tokens
         if not buffer:
             return
-        text = " ".join(c.text for c in buffer if c.text).strip()
-        text = re.sub(r"\s+", " ", text)
+        if every_cue_has_tokens:
+            text = " ".join(t[2] for t in tokens)
+            keep = tuple(tokens)
+        else:
+            text = " ".join(c.text for c in buffer if c.text)
+            keep = ()
+        text = re.sub(r"\s+", " ", text).strip()
         if text:
             merged.append(
                 Cue(
@@ -232,9 +245,12 @@ def _merge(cues: list[Cue]) -> list[Cue]:
                     max(buffer[-1].end, buffer[0].start + 0.2),
                     text,
                     buffer[0].kind if all(c.kind == buffer[0].kind for c in buffer) else "speech",
+                    keep,
                 )
             )
         buffer.clear()
+        tokens.clear()
+        every_cue_has_tokens = True
 
     for cue in cues:
         if cue.kind != "speech":
@@ -247,6 +263,10 @@ def _merge(cues: list[Cue]) -> list[Cue]:
             if span > MAX_CUE_SEC or (punctuation and span > 1.5):
                 flush()
         buffer.append(cue)
+        if cue.tokens:
+            tokens.extend(cue.tokens)
+        else:
+            every_cue_has_tokens = False
     flush()
     return merged
 

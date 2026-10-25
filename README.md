@@ -75,7 +75,7 @@ use.
 | Piece | How it works |
 | --- | --- |
 | Font | `Komika Axis` from `~/clipforge/fonts` (personal-use font, **not** in git). Falls back to bundled `Bangers` (OFL) if missing. |
-| Timing | One word per card by default. Auto-captions only carry phrase timings, so word durations are split by character weight inside each cue. |
+| Timing | Uses YouTube's inline per-word timestamps, so each card lands on the word being said (median 3 ms off). A word stays up until the next one starts. Cues without word stamps (e.g. Whisper) fall back to character-weight splitting. |
 | Pop | Each word starts at 118% and settles to 100% over 90 ms (`\fscx/\fscy` + `\t`). |
 | Keywords | Words like *insane*, *never*, *million*, *exposed* get `\c&H00FF00&` fill + `\3c&HFFFFFF&` stroke. Deliberately short list — highlight everything and nothing stands out. |
 | Fit | Words wider than 92% of the frame auto-shrink, so "UNBELIEVABLE" never clips the edges. |
@@ -213,9 +213,10 @@ Clips that fail `min_score` are dropped rather than padded out with filler.
 - **Volume.** See *Source volume* above: 10 clips/day needs roughly 5+ new source videos
   a week, or it runs out of material.
 - **Captions.** Free YouTube auto-captions are good enough to find moments, not perfect
-  as burned text. MrBeast-style word timing is derived from phrase timings, so occasionally
-  a word lands a beat early. Set `analysis.whisper_fallback: true` and
-  `pip install faster-whisper` if you want accurate local transcription at the cost of compute.
+  as burned text. Word cards follow YouTube's own word timestamps, so they land on the
+  audio; a word without a timestamp in the source may show slightly early or late.
+  Set `analysis.whisper_fallback: true` and `pip install faster-whisper` if you want
+  local transcription at the cost of compute.
 - **Fonts.** `Komika Axis` is free for personal use only, so it is installed outside the
   repo (`C:\Users\Amin\clipforge\fonts`). The repo ships `Bangers` under the OFL, so a
   fresh clone still renders — it just looks slightly different.
