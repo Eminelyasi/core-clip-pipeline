@@ -61,7 +61,6 @@ def base_opts(cookies: Path | None = None) -> dict:
         "fragment_retries": 3,
         "socket_timeout": 30,
         "ignoreerrors": False,
-        "extractor_args": {"youtube": {"player_client": ["default", "web_safari"]}},
     }
     location = _ffmpeg_location()
     if location:
@@ -69,7 +68,78 @@ def base_opts(cookies: Path | None = None) -> dict:
     cookiefile = cookies or cookies_path()
     if cookiefile and Path(cookiefile).exists():
         opts["cookiefile"] = str(cookiefile)
+    proxy = _proxy()
+    if proxy:
+        opts["proxy"] = proxy
     return opts
+
+
+# YouTube's bot check is applied per player client, so a datacenter IP that gets
+# "Sign in to confirm you're not a bot" on the web client can still work on another.
+# Verified with yt-dlp 2026.10.21: `tv_embedded` serves 1080p, `default` 720p+,
+# `android_vr` only 360p (last resort). `tv`, `ios`, `mweb`, `web_safari` are
+# SABR-only and need PO tokens, so they are deliberately not in this list.
+_CLIENT_ROTATION: tuple[tuple[str, ...], ...] = (
+    ("default",),
+    ("tv_embedded",),
+    ("android_vr",),
+)
+
+
+def _retryable(exc: Exception) -> bool:
+    """Errors that a different player client might not hit."""
+    text = str(exc).lower()
+    return any(
+        marker in text
+        for marker in (
+            "sign in to confirm",
+            "not a bot",
+            "bot check",
+            "please sign in",
+            "requested format is not available",
+            "needs to be reloaded",
+            "only images are available",
+            "po token",
+        )
+    )
+
+
+def _proxy() -> str | None:
+    """Optional egress proxy, so a blocked cloud IP can be routed around."""
+    for name in ("CLIPFORGE_PROXY", "HTTPS_PROXY", "https_proxy"):
+        value = os.environ.get(name)
+        if value:
+            return value
+    return None
+
+
+def _with_client_rotation(
+    run,
+    cookies: Path | None = None,
+    extra: dict | None = None,
+    formats: list[str | None] | None = None,
+):
+    """Run `run(opts)`, rotating player client and format on retryable failures."""
+    ladder = formats or [None]
+    last: Exception | None = None
+    for clients in _CLIENT_ROTATION:
+        for fmt in ladder:
+            opts = base_opts(cookies) | {"extractor_args": {"youtube": {"player_client": list(clients)}}}
+            if extra:
+                opts = opts | extra
+            if fmt:
+                opts["format"] = fmt
+            try:
+                result = run(opts)
+            except DownloadError as exc:
+                last = exc
+                if not _retryable(exc):
+                    raise _friendly_errors(exc) from exc
+                continue
+            if clients != ("default",):
+                print(f"[yt] downloaded with fallback client: {clients[0]}", flush=True)
+            return result
+    raise _friendly_errors(last or YouTubeError("download failed"))
 
 
 def _friendly_errors(exc: Exception) -> YouTubeError:
@@ -164,22 +234,34 @@ def download_video(
 ) -> Path:
     dest_dir.mkdir(parents=True, exist_ok=True)
     outtmpl = str(dest_dir / f"{video_id}.%(ext)s")
-    opts = base_opts(cookies) | {
-        "format": (
-            f"bestvideo[height<={max_height}][ext=mp4]+bestaudio[ext=m4a]/"
-            f"best[height<={max_height}][ext=mp4]/best[height<={max_height}]/best"
-        ),
-        "merge_output_format": "mp4",
-        "outtmpl": outtmpl,
-        "writethumbnail": False,
-        "writesubtitles": False,
-        "writeautomaticsub": False,
-    }
-    try:
+    url = f"https://www.youtube.com/watch?v={video_id}"
+
+    def attempt(opts: dict) -> None:
+        # A failed client can leave a .part behind; start each attempt clean.
+        for stale in dest_dir.glob(f"{video_id}.*"):
+            if stale.suffix.lower() in {".part", ".ytdl"}:
+                stale.unlink(missing_ok=True)
         with YoutubeDL(opts) as ydl:
-            ydl.download([f"https://www.youtube.com/watch?v={video_id}"])
-    except DownloadError as exc:
-        raise _friendly_errors(exc) from exc
+            ydl.download([url])
+
+    preferred = (
+        f"bestvideo[height<={max_height}][ext=mp4]+bestaudio[ext=m4a]/"
+        f"best[height<={max_height}][ext=mp4]/best[height<={max_height}]/best"
+    )
+    fallback = f"best[height<={max_height}]/best"
+
+    _with_client_rotation(
+        attempt,
+        cookies,
+        {
+            "merge_output_format": "mp4",
+            "outtmpl": outtmpl,
+            "writethumbnail": False,
+            "writesubtitles": False,
+            "writeautomaticsub": False,
+        },
+        formats=[preferred, fallback],
+    )
 
     for candidate in sorted(dest_dir.glob(f"{video_id}.*")):
         if candidate.suffix.lower() in {".mp4", ".mkv", ".webm"}:
@@ -193,18 +275,25 @@ _SKIP_SUBTITLE_SUFFIXES = {"live_chat"}
 def fetch_captions(video_id: str, dest_dir: Path, cookies: Path | None = None) -> Path | None:
     """Grab YouTube auto-captions (VTT). Free transcript, no ASR compute."""
     dest_dir.mkdir(parents=True, exist_ok=True)
-    opts = base_opts(cookies) | {
-        "skip_download": True,
-        "writesubtitles": True,
-        "writeautomaticsub": True,
-        "subtitleslangs": ["en", "en-orig", "en-US", "en-GB"],
-        "subtitlesformat": "vtt/vtt",
-        "outtmpl": str(dest_dir / f"{video_id}.%(ext)s"),
-    }
-    try:
+
+    def attempt(opts: dict) -> None:
         with YoutubeDL(opts) as ydl:
             ydl.download([f"https://www.youtube.com/watch?v={video_id}"])
-    except DownloadError:
+
+    try:
+        _with_client_rotation(
+            attempt,
+            cookies,
+            {
+                "skip_download": True,
+                "writesubtitles": True,
+                "writeautomaticsub": True,
+                "subtitleslangs": ["en", "en-orig", "en-US", "en-GB"],
+                "subtitlesformat": "vtt/vtt",
+                "outtmpl": str(dest_dir / f"{video_id}.%(ext)s"),
+            },
+        )
+    except YouTubeError:
         return None
 
     found = []

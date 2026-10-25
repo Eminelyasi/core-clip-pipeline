@@ -290,7 +290,8 @@ without a long run. Output lands in `output\<today>\`.
 
 | Symptom | Cause | Fix |
 | --- | --- | --- |
-| `Sign in to confirm you're not a bot` | No/expired cookies | Step 5, then re-run |
+| `Sign in to confirm you're not a bot` on **download** (discovery still works) | YouTube blocks GitHub's datacenter IPs; cookies alone no longer defeat it. The code now retries with the `tv_embedded` client first | If the run still fails, use **Plan B** below |
+| `Sign in to confirm you're not a bot` on **discovery** | No/expired cookies | Step 5, then re-run |
 | `This channel does not have a videos tab` | Wrong channel ID | Recheck the `UC...` in `config.yaml` |
 | `ffmpeg: not found` locally | Not on PATH | `winget install Gyan.FFmpeg`, new terminal |
 | `0 clips produced` | Nothing above `min_score` | Lower `min_score` to `0.2` |
@@ -302,13 +303,21 @@ without a long run. Output lands in `output\<today>\`.
 ### Plan B: self-hosted runner (if YouTube keeps blocking GitHub)
 
 Runs on your own PC, so it uses your home IP and needs no cookies. Your PC must be on.
+Verified working from your machine, so this is the guaranteed path.
 
-1. Repo → **Settings → Actions → Runners → New self-hosted runner**
-2. Follow the Windows instructions it shows (download, `config.cmd`, `run.cmd`)
-3. Install it as a service so it survives reboots: `.\svc.cmd install`
-4. In `daily-clips.yml`, change `runs-on: ubuntu-latest` to `runs-on: self-hosted`
-5. Delete the `Install ffmpeg` step (Windows has no `apt-get`) and install ffmpeg locally
-   instead via `winget install Gyan.FFmpeg`
+1. Repo → **Settings → Actions → Runners → New self-hosted runner** → **Windows x64**
+2. Run the four commands it shows in PowerShell (download, `config.cmd --url ... --token ...`,
+   then `.\run.cmd` to test)
+3. Install it as a service so it survives reboots (from the runner folder, in an **admin**
+   PowerShell): `.\svc.cmd install` then `.\svc.cmd start`
+4. In `daily-clips.yml`, change `runs-on: ubuntu-latest` to `runs-on: [self-hosted, Windows]`
+5. Delete the `Install ffmpeg` step (Windows has no working `apt-get`) and
+   `winget install Gyan.FFmpeg` on the PC once
+6. Keep the cookies step — harmless — or delete the `YT_COOKIES_B64` secret
+
+Wake-on-schedule: in Windows **Task Scheduler**, the pipeline only runs while the PC is
+awake. Either keep it plugged in and set *Power & sleep → Sleep: Never* when charging, or
+change the cron in `daily-clips.yml` to a time you are usually using the machine.
 
 ---
 
