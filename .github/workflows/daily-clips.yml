@@ -44,7 +44,46 @@ jobs:
 
       - name: Restore YouTube cookies
         if: env.YT_COOKIES_B64 != ''
-        run: echo "$YT_COOKIES_B64" | base64 -d > cookies.txt
+        shell: bash
+        run: |
+          set -uo pipefail
+          # A secret is single-line, but strip stray whitespace/quotes from manual pastes.
+          printf '%s' "$YT_COOKIES_B64" | tr -d ' \t\r\n"' > /tmp/cookies.b64
+          chars=$(wc -c < /tmp/cookies.b64)
+          echo "secret payload: ${chars} characters"
+
+          if grep -qE 'youtube\.com|Netscape' /tmp/cookies.b64; then
+            echo "::error::YT_COOKIES_B64 contains the raw cookies.txt text, not base64."
+            echo "Fix: run tools/make_cookies_secret.ps1 locally, then paste its clipboard value into the secret."
+            exit 1
+          fi
+
+          if [ -n "$(tr -d 'A-Za-z0-9+/=' < /tmp/cookies.b64)" ]; then
+            echo "::error::YT_COOKIES_B64 has characters that are not valid base64 (A-Z a-z 0-9 + / =)."
+            echo "Fix: re-copy the value from tools/make_cookies_secret.ps1 and paste it whole."
+            exit 1
+          fi
+
+          if ! base64 -d /tmp/cookies.b64 > cookies.txt 2> /tmp/b64.err; then
+            echo "::error::YT_COOKIES_B64 is not decodable base64 (truncated or mangled paste)."
+            echo "decoder: $(cat /tmp/b64.err)"
+            exit 1
+          fi
+
+          bytes=$(wc -c < cookies.txt)
+          if [ "$bytes" -lt 100 ]; then
+            echo "::error::decoded cookies.txt is only ${bytes} bytes, so the paste was truncated."
+            echo "Fix: re-run tools/make_cookies_secret.ps1 and paste the whole clipboard value."
+            exit 1
+          fi
+
+          if ! grep -qi 'youtube\.com' cookies.txt; then
+            echo "::error::decoded file has no youtube.com cookies."
+            echo "Fix: export cookies from a signed-in youtube.com tab."
+            exit 1
+          fi
+
+          echo "cookies.txt ready: ${bytes} bytes, $(grep -ci 'youtube\.com' cookies.txt) youtube.com rows"
 
       - name: Doctor
         run: python -m clipforge doctor

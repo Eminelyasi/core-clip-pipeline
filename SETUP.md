@@ -127,15 +127,18 @@ GitHub's servers are on datacenter IPs. YouTube often answers them with
 2. Go to **https://www.youtube.com** and make sure you are **signed in**
 3. Click the extension icon → **Export** → save the file as `cookies.txt`
    (it usually lands in `Downloads`)
-4. In PowerShell, encode it to text and copy it to your clipboard:
+4. In PowerShell, validate + encode it and copy the secret value to your clipboard:
 
 ```powershell
-$b64 = [Convert]::ToBase64String([IO.File]::ReadAllBytes("$HOME\Downloads\cookies.txt"))
-$b64 | Set-Clipboard
-Write-Output "copied $($b64.Length) characters"
+cd "C:\Users\Amin\OneDrive\Documents\Default Project\core-clip-pipeline"
+.\tools\make_cookies_secret.ps1
 ```
 
-**You should see:** `copied 12345 characters` (the number varies).
+**You should see** `SUCCESS: value is on your clipboard.` plus a line like
+`youtube rows: 412` and `base64 : 41230 characters (ok)`.
+
+If that script says `FAIL`, fix the file first — the workflow will fail the same way.
+Never paste a value you have not produced with this script.
 
 5. In your repo: **Settings → Secrets and variables → Actions**
 6. Click **New repository secret**
