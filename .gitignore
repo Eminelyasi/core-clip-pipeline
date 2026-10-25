@@ -1,0 +1,12 @@
+output/
+work/
+*.mp4
+*.mkv
+*.webm
+*.vtt
+*.ass
+cookies.txt
+.env
+__pycache__/
+*.pyc
+.venv/

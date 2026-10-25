@@ -1,0 +1,102 @@
+name: Daily clips
+
+on:
+  schedule:
+    # 13:00 UTC = 09:00 New York (EDT). Adjust to your posting time.
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Discovery only (no downloads)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: daily-clips
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  clip:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+
+    env:
+      PYTHONPATH: src
+      PYTHONUNBUFFERED: "1"
+      YT_COOKIES_B64: ${{ secrets.YT_COOKIES_B64 }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
+
+      - name: Install Python deps
+        run: pip install -r requirements.txt
+
+      - name: Restore YouTube cookies
+        if: env.YT_COOKIES_B64 != ''
+        run: echo "$YT_COOKIES_B64" | base64 -d > cookies.txt
+
+      - name: Doctor
+        run: python -m clipforge doctor
+
+      - name: Build today's clips
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python -m clipforge run --dry-run
+          else
+            python -m clipforge run
+          fi
+
+      - name: Show output
+        if: always()
+        run: |
+          ls -R output || true
+
+      - name: Upload clips as artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clips-${{ github.run_number }}
+          path: output/
+          # 3 days keeps storage small; the Release below is permanent.
+          # On a private repo set this to 1 (500 MB free tier).
+          retention-days: 3
+          if-no-files-found: warn
+
+      - name: Publish release (permanent download page)
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: clips-${{ github.run_number }}
+          name: "Clips ${{ github.run_number }}"
+          body: |
+            Auto-generated vertical clips. Download, then upload to TikTok / Shorts / Reels.
+            Captions for each clip are in the `captions/` folder next to the videos.
+          files: |
+            output/**/clips/*.mp4
+            output/**/captions/*.txt
+            output/**/UPLOAD.txt
+            output/**/manifest.json
+          fail_on_unmatched_files: false
+          make_latest: true
+
+      - name: Persist dedupe state
+        if: success()
+        run: |
+          if [ -n "$(git status --porcelain state/processed.json)" ]; then
+            git config user.name  "clipforge-bot"
+            git config user.email "clipforge-bot@users.noreply.github.com"
+            git add state/processed.json
+            git commit -m "chore: update clip state [skip ci]"
+            git push
+          fi

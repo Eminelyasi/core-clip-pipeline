@@ -1,0 +1,114 @@
+# ============================================================
+#  CORE clip pipeline - configuration
+#  Everything the daily job does is driven by this file.
+# ============================================================
+
+sources:
+  # Channel IDs are used instead of @handles: a handle can point at an empty
+  # legacy channel with the same name (that happened with CORE BOYS).
+  # To add more: open the channel, copy the UC... part of the URL.
+
+  # 1.31M subs, 2.5-4.2M views/video - the highest-traffic source
+  - handle: "UC6H8_DvqnEp1tYEp10GzH0g"
+    name: "CORE"
+    rights_confirmed: true
+    max_candidates: 2
+
+  # 1.45M subs, 250-550k views/video
+  - handle: "UCLldJScHWCtsFlfanYXS8nQ"
+    name: "Stable Ronaldo"
+    rights_confirmed: true
+    max_candidates: 2
+
+  # 1.26M subs, up to 1.1M views/video
+  - handle: "UCxoKaKMzulp6sfQGOhNJnzQ"
+    name: "JasonTheWeen"
+    rights_confirmed: true
+    max_candidates: 2
+
+  # 1.64M subs, 58-153k views/video
+  - handle: "UC7RNjS5nGShmMSuMcVgUyjQ"
+    name: "Marlon"
+    rights_confirmed: true
+    max_candidates: 2
+
+  # 975k subs, ~300k views/video
+  - handle: "UCeoZXkaJDtdTHafgoZeDcAA"
+    name: "Lacy"
+    rights_confirmed: true
+    max_candidates: 1
+
+  # 394k subs
+  - handle: "UCsx2dUKBb5vAYuXq-bqlfuQ"
+    name: "Silky"
+    rights_confirmed: true
+    max_candidates: 1
+
+  # 5.92M subs - more produced content, fewer raw moments
+  - handle: "UCi87kxosIT3wrnEA-mv4jWA"
+    name: "Adapt"
+    rights_confirmed: true
+    max_candidates: 1
+
+  # 6.2k views/video - low traffic, kept for completeness
+  - handle: "UCBp2TJRE8IY9Iv-vuGLOsag"
+    name: "CORE BOYS"
+    rights_confirmed: true
+    max_candidates: 1
+
+  # Optional secondary channels (stream VODs, redundant with the mains above):
+  # - handle: "UClK4S3kGZN8YTiWA1MRaH0g"   # JasonTheWeen Live
+  #   name: "JasonTheWeen Live"
+  #   rights_confirmed: true
+  #   max_candidates: 1
+  # - handle: "UC7qDQ-DAG_JcrMM8yZ4D8Bw"   # Lacy Live
+  #   name: "Lacy Live"
+  #   rights_confirmed: true
+  #   max_candidates: 1
+  # - handle: "UCTWPP2qKNdc781NMVDGFAwg"   # Stable Ronaldo More
+  #   name: "Stable Ronaldo More"
+  #   rights_confirmed: true
+  #   max_candidates: 1
+
+targets:
+  clips_per_day: 10
+  clip_length_sec: 60
+  # 2 per video now that there are 8 sources; keeps the batch varied
+  # instead of 5 clips from one stream.
+  max_clips_per_source_video: 2
+  min_gap_sec: 45          # keep clips from the same video apart
+  min_score: 0.30          # skip a video that yields nothing above this
+  max_videos_downloaded: 6 # hard cap on bandwidth per run
+
+render:
+  width: 1080              # vertical 9:16
+  height: 1920
+  fps: 30
+  layout: blur_pad         # blur_pad | center_crop | fit
+  blur_sigma: 28
+  crf: 22
+  preset: veryfast
+  audio_lufs: -14
+  burn_captions: true
+  caption_font: "DejaVu Sans"
+  caption_size: 78
+  caption_outline: 5
+  caption_margin_v: 430    # clears TikTok / Reels UI
+  caption_uppercase: true
+  max_chars_per_line: 20
+
+analysis:
+  use_youtube_subs: true   # free auto-captions, no whisper needed
+  whisper_fallback: false  # enable only if a video has no captions
+  whisper_model: "tiny"
+  audio_energy: true
+  weights:
+    energy: 0.35           # loud = shouting / laughing / hype
+    speech: 0.15           # enough talking to be watchable
+    hooks: 0.30            # "no way", "bro what", "chat look"
+    laughs: 0.20           # [Laughter] markers from auto-captions
+
+output:
+  dir: "output"
+  keep_source_files: false
+  write_platform_captions: true
