@@ -180,7 +180,18 @@ jobs:
             git add state/processed.json
             git commit -m "chore: update clip state [skip ci]"
             # checkout can leave a detached HEAD, so push the commit explicitly.
-            git push origin HEAD:main
+            # Anyone may push to main while a run is going, so rebase and retry
+            # instead of failing the whole job on a non-fast-forward.
+            for ($i = 1; $i -le 4; $i++) {
+              git fetch origin main
+              if ($LASTEXITCODE -ne 0) { Start-Sleep -Seconds 5; continue }
+              git rebase origin/main
+              if ($LASTEXITCODE -ne 0) { git rebase --abort; Start-Sleep -Seconds 5; continue }
+              git push origin HEAD:main
+              if ($LASTEXITCODE -eq 0) { Write-Output "state pushed (attempt $i)"; break }
+              Start-Sleep -Seconds 5
+            }
+            if ($LASTEXITCODE -ne 0) { throw "could not push state to main" }
           } else {
             Write-Output "state unchanged - nothing to commit"
           }

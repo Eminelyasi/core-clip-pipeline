@@ -160,6 +160,86 @@
         }
       ],
       "last_run": "2026-10-25T17:32:48+00:00"
+    },
+    "QD-Ts5hej1g": {
+      "title": "CORE JEOPARDY",
+      "clips": [
+        {
+          "start": 57.15,
+          "end": 117.15,
+          "file": "clips/01_core_QD-Ts5hej1g_0057.mp4"
+        },
+        {
+          "start": 1982.47,
+          "end": 2042.47,
+          "file": "clips/02_core_QD-Ts5hej1g_1982.mp4"
+        }
+      ],
+      "last_run": "2026-10-26T18:10:47+00:00"
+    },
+    "POceRNZNF7U": {
+      "title": "I Got Jumped..",
+      "clips": [
+        {
+          "start": 602.24,
+          "end": 662.24,
+          "file": "clips/03_stable-ronaldo_POceRNZNF7U_0602.mp4"
+        },
+        {
+          "start": 1436.52,
+          "end": 1496.52,
+          "file": "clips/04_stable-ronaldo_POceRNZNF7U_1436.mp4"
+        }
+      ],
+      "last_run": "2026-10-26T18:13:28+00:00"
+    },
+    "RszX6U4zCOg": {
+      "title": "I BOUGHT A $250,000 PORSCHE 911 TURBO S!",
+      "clips": [
+        {
+          "start": 383.53,
+          "end": 443.53,
+          "file": "clips/05_jasontheween_RszX6U4zCOg_0383.mp4"
+        },
+        {
+          "start": 1091.43,
+          "end": 1151.43,
+          "file": "clips/06_jasontheween_RszX6U4zCOg_1091.mp4"
+        }
+      ],
+      "last_run": "2026-10-26T18:19:24+00:00"
+    },
+    "HG4krc-zBLo": {
+      "title": "I Became A Security Guard At Jason's NMS Boxing Event..",
+      "clips": [
+        {
+          "start": 501.26,
+          "end": 561.26,
+          "file": "clips/07_marlon_HG4krc-zBLo_0501.mp4"
+        },
+        {
+          "start": 1061.28,
+          "end": 1121.28,
+          "file": "clips/08_marlon_HG4krc-zBLo_1061.mp4"
+        }
+      ],
+      "last_run": "2026-10-26T18:21:41+00:00"
+    },
+    "SbdLybw_hrk": {
+      "title": "VOTE US FOR STREAMER DUO OF THE YEAR!",
+      "clips": [
+        {
+          "start": 631.44,
+          "end": 691.44,
+          "file": "clips/09_lacy_SbdLybw_hrk_0631.mp4"
+        },
+        {
+          "start": 1462.45,
+          "end": 1522.45,
+          "file": "clips/10_lacy_SbdLybw_hrk_1462.mp4"
+        }
+      ],
+      "last_run": "2026-10-26T18:27:12+00:00"
     }
   },
   "runs": [
@@ -170,6 +250,11 @@
     },
     {
       "at": "2026-10-25T17:32:48+00:00",
+      "produced": 10,
+      "requested": 10
+    },
+    {
+      "at": "2026-10-26T18:27:12+00:00",
       "produced": 10,
       "requested": 10
     }
