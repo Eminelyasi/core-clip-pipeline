@@ -79,6 +79,7 @@ use.
 | Pop | Each word starts at 118% and settles to 100% over 90 ms (`\fscx/\fscy` + `\t`). |
 | Keywords | Words like *insane*, *never*, *million*, *exposed* get `\c&H00FF00&` fill + `\3c&HFFFFFF&` stroke. Deliberately short list — highlight everything and nothing stands out. |
 | Fit | Words wider than 92% of the frame auto-shrink, so "UNBELIEVABLE" never clips the edges. |
+| Wording | The text is exactly what was said: swearing stays verbatim, nothing is paraphrased or dropped. The n-word (any spelling) is replaced by a ninja emoji 🥷, in captions and in clip titles. The only other edit is YouTube's `[ __ ]` marker, which hides an unrecoverable word and would look like a glitch. |
 
 Change the style in `config.yaml`:
 
