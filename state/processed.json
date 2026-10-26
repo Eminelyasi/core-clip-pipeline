@@ -240,6 +240,86 @@
         }
       ],
       "last_run": "2026-10-26T18:27:12+00:00"
+    },
+    "68I0M-XmGEw": {
+      "title": "CORE ALL SPORTS GOLF BATTLE",
+      "clips": [
+        {
+          "start": 527.16,
+          "end": 587.16,
+          "file": "clips/01_core_68I0M-XmGEw_0527.mp4"
+        },
+        {
+          "start": 1041.25,
+          "end": 1101.25,
+          "file": "clips/02_core_68I0M-XmGEw_1041.mp4"
+        }
+      ],
+      "last_run": "2026-10-26T19:10:03+00:00"
+    },
+    "OI41kBy42gE": {
+      "title": "I Did A P.O. Box Opening With CORE!",
+      "clips": [
+        {
+          "start": 246.61,
+          "end": 306.61,
+          "file": "clips/03_stable-ronaldo_OI41kBy42gE_0246.mp4"
+        },
+        {
+          "start": 1122.28,
+          "end": 1182.28,
+          "file": "clips/04_stable-ronaldo_OI41kBy42gE_1122.mp4"
+        }
+      ],
+      "last_run": "2026-10-26T19:14:17+00:00"
+    },
+    "f-CMWn0qN58": {
+      "title": "I Hosted A $100,000 Streamer Boxing Event!",
+      "clips": [
+        {
+          "start": 2171.68,
+          "end": 2231.68,
+          "file": "clips/05_jasontheween_f-CMWn0qN58_2171.mp4"
+        },
+        {
+          "start": 3348.0,
+          "end": 3408.0,
+          "file": "clips/06_jasontheween_f-CMWn0qN58_3348.mp4"
+        }
+      ],
+      "last_run": "2026-10-26T19:19:04+00:00"
+    },
+    "CytQuaHUaWc": {
+      "title": "CAMPAIGNING FOR OUR DUO OF THE YEAR!",
+      "clips": [
+        {
+          "start": 3661.44,
+          "end": 3721.44,
+          "file": "clips/07_marlon_CytQuaHUaWc_3661.mp4"
+        },
+        {
+          "start": 3706.8,
+          "end": 3766.8,
+          "file": "clips/08_marlon_CytQuaHUaWc_3706.mp4"
+        }
+      ],
+      "last_run": "2026-10-26T19:33:29+00:00"
+    },
+    "RXw2yg6AlTo": {
+      "title": "the NFL invited me back to a game..",
+      "clips": [
+        {
+          "start": 317.93,
+          "end": 377.93,
+          "file": "clips/09_lacy_RXw2yg6AlTo_0317.mp4"
+        },
+        {
+          "start": 362.41,
+          "end": 422.41,
+          "file": "clips/10_lacy_RXw2yg6AlTo_0362.mp4"
+        }
+      ],
+      "last_run": "2026-10-26T19:39:27+00:00"
     }
   },
   "runs": [
@@ -255,6 +335,11 @@
     },
     {
       "at": "2026-10-26T18:27:12+00:00",
+      "produced": 10,
+      "requested": 10
+    },
+    {
+      "at": "2026-10-26T19:39:27+00:00",
       "produced": 10,
       "requested": 10
     }
