@@ -59,8 +59,14 @@ _FILLER_PREFIX = re.compile(
     re.IGNORECASE,
 )
 
-# YouTube's auto-captions censor swearing as "[ __ ]". It looks like a glitch on screen.
+# YouTube's auto-captions censor swearing as "[ __ ]". It looks like a glitch on screen
+# and the real word is not recoverable, so the marker is dropped.
 CENSORED = re.compile(r"\[\s*_+\s*\]")
+
+# Burned captions show exactly what was said - swearing stays verbatim. The one
+# exception is the n-word, which is always swapped for a ninja emoji.
+NINJA = "\U0001F977"
+N_WORD = re.compile(r"\bn[i1]gg\w*|\bn[i1]ga\b", re.IGNORECASE)
 
 
 def strip_censored(text: str) -> str:
@@ -68,6 +74,16 @@ def strip_censored(text: str) -> str:
     text = re.sub(r"\s+", " ", text)
     text = re.sub(r"\s+([,.;:!?])", r"\1", text)
     return text.strip(" ,;:-")
+
+
+def sanitize_token(token: str) -> str:
+    """Caption-safe version of a single word, punctuation kept intact."""
+    return N_WORD.sub(NINJA, CENSORED.sub("", token))
+
+
+def sanitize_line(text: str) -> str:
+    """Caption-safe version of a full line: verbatim speech, n-word -> ninja."""
+    return strip_censored(N_WORD.sub(NINJA, text))
 
 
 def _words(text: str) -> list[str]:
@@ -112,7 +128,7 @@ def _tidy(text: str) -> str:
 
 def _clip_text(cues: list[Cue], start: float, end: float, limit: int = 120) -> str:
     text = " ".join(c.text for c in cues_between(cues, start, end) if c.kind == "speech")
-    return _tidy(strip_censored(text))[:limit].strip()
+    return _tidy(sanitize_line(text))[:limit].strip()
 
 
 def _pick_hook(text: str) -> str:

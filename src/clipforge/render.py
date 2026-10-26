@@ -13,7 +13,7 @@ import numpy as np
 
 from .settings import Render
 from .transcript import Cue, cues_between
-from .caption import strip_censored
+from .caption import sanitize_line, sanitize_token
 
 
 class FFmpegError(RuntimeError):
@@ -253,7 +253,7 @@ def _token_spans(
         return None
     spans: list[tuple[float, float]] = []
     for word, (word_start, word_end, raw) in zip(words, tokens):
-        cleaned = strip_censored(raw)
+        cleaned = sanitize_token(raw)
         if uppercase:
             cleaned = cleaned.upper()
         if cleaned != word:
@@ -271,7 +271,7 @@ def _word_events(cue: Cue, clip_start: float, clip_dur: float, cfg: Render) -> l
     lands on the word that is actually being said. Falls back to splitting the
     phrase by character weight when only phrase timings exist (e.g. Whisper).
     """
-    text = strip_censored(cue.text)
+    text = sanitize_line(cue.text)
     if cfg.caption_uppercase:
         text = text.upper()
     words = text.split()
@@ -365,7 +365,7 @@ def _wrap(text: str, max_chars: int) -> list[str]:
 
 def _cue_events(cue: Cue, clip_start: float, clip_dur: float, cfg: Render) -> list[tuple[float, float, str]]:
     """Turn one cue into 1-2 line caption cards, timed by character share."""
-    text = strip_censored(cue.text)
+    text = sanitize_line(cue.text)
     text = text.upper() if cfg.caption_uppercase else text
     lines = _wrap(text, cfg.max_chars_per_line)
     if not lines:

@@ -29,6 +29,7 @@ jobs:
     env:
       PYTHONPATH: src
       PYTHONUNBUFFERED: "1"
+      PYTHONUTF8: "1"
       YT_COOKIES_B64: ${{ secrets.YT_COOKIES_B64 }}
 
     steps:
