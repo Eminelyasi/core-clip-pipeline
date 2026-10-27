@@ -320,6 +320,86 @@
         }
       ],
       "last_run": "2026-10-26T19:39:27+00:00"
+    },
+    "WJT7oeyEouY": {
+      "title": "CORE SURVIVES OVERNIGHT IN A HAUNTED HOUSE (ft. FaZe Rug)",
+      "clips": [
+        {
+          "start": 171.4,
+          "end": 231.4,
+          "file": "clips/01_core_WJT7oeyEouY_0171.mp4"
+        },
+        {
+          "start": 1861.67,
+          "end": 1921.67,
+          "file": "clips/02_core_WJT7oeyEouY_1861.mp4"
+        }
+      ],
+      "last_run": "2026-10-27T18:41:17+00:00"
+    },
+    "rgTAZglo994": {
+      "title": "Living With CORE For 24 Hours!",
+      "clips": [
+        {
+          "start": 297.0,
+          "end": 357.0,
+          "file": "clips/03_stable-ronaldo_rgTAZglo994_0297.mp4"
+        },
+        {
+          "start": 694.41,
+          "end": 754.41,
+          "file": "clips/04_stable-ronaldo_rgTAZglo994_0694.mp4"
+        }
+      ],
+      "last_run": "2026-10-27T18:48:55+00:00"
+    },
+    "xDK1EMqOzKs": {
+      "title": "Living With IShowSpeed For 72 Hours!",
+      "clips": [
+        {
+          "start": 971.09,
+          "end": 1031.09,
+          "file": "clips/05_jasontheween_xDK1EMqOzKs_0971.mp4"
+        },
+        {
+          "start": 1161.19,
+          "end": 1221.19,
+          "file": "clips/06_jasontheween_xDK1EMqOzKs_1161.mp4"
+        }
+      ],
+      "last_run": "2026-10-27T18:53:49+00:00"
+    },
+    "4NXigjKxCYE": {
+      "title": "MARLON VS ANGRYGINGE FC27 $10,000 1V1 WAGER!",
+      "clips": [
+        {
+          "start": 431.55,
+          "end": 491.55,
+          "file": "clips/07_marlon_4NXigjKxCYE_0431.mp4"
+        },
+        {
+          "start": 4191.84,
+          "end": 4251.84,
+          "file": "clips/08_marlon_4NXigjKxCYE_4191.mp4"
+        }
+      ],
+      "last_run": "2026-10-27T19:03:14+00:00"
+    },
+    "5PAz6kRfI-I": {
+      "title": "We Either Double Our Money or Lose It All.. (ft. Bluff)",
+      "clips": [
+        {
+          "start": 1407.24,
+          "end": 1467.24,
+          "file": "clips/09_lacy_5PAz6kRfI-I_1407.mp4"
+        },
+        {
+          "start": 1453.26,
+          "end": 1513.26,
+          "file": "clips/10_lacy_5PAz6kRfI-I_1453.mp4"
+        }
+      ],
+      "last_run": "2026-10-27T19:07:07+00:00"
     }
   },
   "runs": [
@@ -340,6 +420,11 @@
     },
     {
       "at": "2026-10-26T19:39:27+00:00",
+      "produced": 10,
+      "requested": 10
+    },
+    {
+      "at": "2026-10-27T19:07:07+00:00",
       "produced": 10,
       "requested": 10
     }
