@@ -480,6 +480,86 @@
         }
       ],
       "last_run": "2026-10-28T19:04:29+00:00"
+    },
+    "xZr7ExIGlI4": {
+      "title": "CORE TRAPPED IN AN ARCADE UNTIL WE WIN A PS5",
+      "clips": [
+        {
+          "start": 1092.91,
+          "end": 1152.91,
+          "file": "clips/01_core_xZr7ExIGlI4_1092.mp4"
+        },
+        {
+          "start": 1136.86,
+          "end": 1196.86,
+          "file": "clips/02_core_xZr7ExIGlI4_1136.mp4"
+        }
+      ],
+      "last_run": "2026-10-29T19:04:29+00:00"
+    },
+    "5lRv6ryx8i8": {
+      "title": "CORE Tries EVERY Taco Bell Menu Item!",
+      "clips": [
+        {
+          "start": 1381.14,
+          "end": 1441.14,
+          "file": "clips/03_stable-ronaldo_5lRv6ryx8i8_1381.mp4"
+        },
+        {
+          "start": 1481.62,
+          "end": 1541.62,
+          "file": "clips/04_stable-ronaldo_5lRv6ryx8i8_1481.mp4"
+        }
+      ],
+      "last_run": "2026-10-29T19:08:13+00:00"
+    },
+    "k1LMV2ICkAg": {
+      "title": "We Tried The Drive-Thru Speedrun Challenge!",
+      "clips": [
+        {
+          "start": 1133.33,
+          "end": 1193.33,
+          "file": "clips/05_jasontheween_k1LMV2ICkAg_1133.mp4"
+        },
+        {
+          "start": 4762.4,
+          "end": 4822.4,
+          "file": "clips/06_jasontheween_k1LMV2ICkAg_4762.mp4"
+        }
+      ],
+      "last_run": "2026-10-29T19:13:14+00:00"
+    },
+    "MAgdH-2Ymy0": {
+      "title": "MARLON VS LACY FC27 $10,000 1V1 WAGER!",
+      "clips": [
+        {
+          "start": 77.25,
+          "end": 137.25,
+          "file": "clips/07_marlon_MAgdH-2Ymy0_0077.mp4"
+        },
+        {
+          "start": 1031.56,
+          "end": 1091.56,
+          "file": "clips/08_marlon_MAgdH-2Ymy0_1031.mp4"
+        }
+      ],
+      "last_run": "2026-10-29T19:15:22+00:00"
+    },
+    "exWgc7KKBqQ": {
+      "title": "I Took My Girlfriend to Japan!",
+      "clips": [
+        {
+          "start": 66.08,
+          "end": 126.08,
+          "file": "clips/09_lacy_exWgc7KKBqQ_0066.mp4"
+        },
+        {
+          "start": 187.13,
+          "end": 247.13,
+          "file": "clips/10_lacy_exWgc7KKBqQ_0187.mp4"
+        }
+      ],
+      "last_run": "2026-10-29T19:17:37+00:00"
     }
   },
   "runs": [
@@ -510,6 +590,11 @@
     },
     {
       "at": "2026-10-28T19:04:29+00:00",
+      "produced": 10,
+      "requested": 10
+    },
+    {
+      "at": "2026-10-29T19:17:37+00:00",
       "produced": 10,
       "requested": 10
     }
