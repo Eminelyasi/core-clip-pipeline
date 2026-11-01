@@ -800,6 +800,86 @@
         }
       ],
       "last_run": "2026-11-01T18:09:40+00:00"
+    },
+    "UJ2IPXImPKQ": {
+      "title": "CORE AMONG US IN REAL LIFE (FT. SIDEMEN)",
+      "clips": [
+        {
+          "start": 4691.66,
+          "end": 4751.66,
+          "file": "clips/01_core_UJ2IPXImPKQ_4691.mp4"
+        },
+        {
+          "start": 4936.9,
+          "end": 4996.9,
+          "file": "clips/02_core_UJ2IPXImPKQ_4936.mp4"
+        }
+      ],
+      "last_run": "2026-11-01T18:31:36+00:00"
+    },
+    "l6UNmSuHW7U": {
+      "title": "Every Time Jynxzi, Ron & Los Died In Minecraft!",
+      "clips": [
+        {
+          "start": 1092.54,
+          "end": 1152.54,
+          "file": "clips/03_stable-ronaldo_l6UNmSuHW7U_1092.mp4"
+        },
+        {
+          "start": 1217.32,
+          "end": 1277.32,
+          "file": "clips/04_stable-ronaldo_l6UNmSuHW7U_1217.mp4"
+        }
+      ],
+      "last_run": "2026-11-01T18:35:31+00:00"
+    },
+    "9zd0Uqz6Z8Y": {
+      "title": "Stuck In A Maybach With Valkyrae!",
+      "clips": [
+        {
+          "start": 16.47,
+          "end": 76.47,
+          "file": "clips/05_jasontheween_9zd0Uqz6Z8Y_0016.mp4"
+        },
+        {
+          "start": 2606.47,
+          "end": 2666.47,
+          "file": "clips/06_jasontheween_9zd0Uqz6Z8Y_2606.mp4"
+        }
+      ],
+      "last_run": "2026-11-01T18:43:16+00:00"
+    },
+    "fLno6tkpg-0": {
+      "title": "I Started A WAR In CORE House...",
+      "clips": [
+        {
+          "start": 401.8,
+          "end": 461.8,
+          "file": "clips/07_marlon_fLno6tkpg-0_0401.mp4"
+        },
+        {
+          "start": 602.32,
+          "end": 662.32,
+          "file": "clips/08_marlon_fLno6tkpg-0_0602.mp4"
+        }
+      ],
+      "last_run": "2026-11-01T18:46:15+00:00"
+    },
+    "k971waO6moQ": {
+      "title": "Worlds Biggest Halloween Food Mukbang!",
+      "clips": [
+        {
+          "start": 2246.72,
+          "end": 2306.72,
+          "file": "clips/09_lacy_k971waO6moQ_2246.mp4"
+        },
+        {
+          "start": 2292.29,
+          "end": 2352.29,
+          "file": "clips/10_lacy_k971waO6moQ_2292.mp4"
+        }
+      ],
+      "last_run": "2026-11-01T18:49:50+00:00"
     }
   },
   "runs": [
@@ -850,6 +930,11 @@
     },
     {
       "at": "2026-11-01T18:09:40+00:00",
+      "produced": 10,
+      "requested": 10
+    },
+    {
+      "at": "2026-11-01T18:49:50+00:00",
       "produced": 10,
       "requested": 10
     }
