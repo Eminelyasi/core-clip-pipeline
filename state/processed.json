@@ -720,6 +720,86 @@
         }
       ],
       "last_run": "2026-10-31T17:55:33+00:00"
+    },
+    "Z8mXg1WFzSc": {
+      "title": "CORE $10,000 BINGO IN REAL LIFE (PARIS EDITION)",
+      "clips": [
+        {
+          "start": 2722.19,
+          "end": 2782.19,
+          "file": "clips/01_core_Z8mXg1WFzSc_2722.mp4"
+        },
+        {
+          "start": 2927.42,
+          "end": 2987.42,
+          "file": "clips/02_core_Z8mXg1WFzSc_2927.mp4"
+        }
+      ],
+      "last_run": "2026-11-01T17:33:01+00:00"
+    },
+    "ZlFubO6hf2c": {
+      "title": "72 Hours In Japan With CORE!",
+      "clips": [
+        {
+          "start": 41.4,
+          "end": 101.4,
+          "file": "clips/03_stable-ronaldo_ZlFubO6hf2c_0041.mp4"
+        },
+        {
+          "start": 168.14,
+          "end": 228.14,
+          "file": "clips/04_stable-ronaldo_ZlFubO6hf2c_0168.mp4"
+        }
+      ],
+      "last_run": "2026-11-01T17:44:56+00:00"
+    },
+    "3rNyHzcDyDY": {
+      "title": "Silky, Plaqueboymax & Deshae Become Grandpas For The Day!",
+      "clips": [
+        {
+          "start": 346.78,
+          "end": 406.78,
+          "file": "clips/05_silky_3rNyHzcDyDY_0346.mp4"
+        },
+        {
+          "start": 1493.43,
+          "end": 1553.43,
+          "file": "clips/06_silky_3rNyHzcDyDY_1493.mp4"
+        }
+      ],
+      "last_run": "2026-11-01T17:58:55+00:00"
+    },
+    "Ge-gWXQiDik": {
+      "title": "Staying Overnight on the Haunted Queen Mary (Room B340)",
+      "clips": [
+        {
+          "start": 51.28,
+          "end": 111.28,
+          "file": "clips/07_adapt_Ge-gWXQiDik_0051.mp4"
+        },
+        {
+          "start": 256.64,
+          "end": 316.64,
+          "file": "clips/08_adapt_Ge-gWXQiDik_0256.mp4"
+        }
+      ],
+      "last_run": "2026-11-01T18:04:21+00:00"
+    },
+    "jhjGdLHnwRA": {
+      "title": "CORE $10,000 BINGO IN REAL LIFE",
+      "clips": [
+        {
+          "start": 1584.08,
+          "end": 1644.08,
+          "file": "clips/09_core-boys_jhjGdLHnwRA_1584.mp4"
+        },
+        {
+          "start": 1841.6,
+          "end": 1901.6,
+          "file": "clips/10_core-boys_jhjGdLHnwRA_1841.mp4"
+        }
+      ],
+      "last_run": "2026-11-01T18:09:40+00:00"
     }
   },
   "runs": [
@@ -765,6 +845,11 @@
     },
     {
       "at": "2026-10-31T17:55:33+00:00",
+      "produced": 10,
+      "requested": 10
+    },
+    {
+      "at": "2026-11-01T18:09:40+00:00",
       "produced": 10,
       "requested": 10
     }
