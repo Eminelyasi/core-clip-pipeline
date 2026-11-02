@@ -880,6 +880,86 @@
         }
       ],
       "last_run": "2026-11-01T18:49:50+00:00"
+    },
+    "3Sbj_BZORr4": {
+      "title": "CORE IRL MAFIA",
+      "clips": [
+        {
+          "start": 2931.16,
+          "end": 2991.16,
+          "file": "clips/01_core_3Sbj_BZORr4_2931.mp4"
+        },
+        {
+          "start": 2976.43,
+          "end": 3036.43,
+          "file": "clips/02_core_3Sbj_BZORr4_2976.mp4"
+        }
+      ],
+      "last_run": "2026-11-02T17:41:42+00:00"
+    },
+    "BaX8SToPrWU": {
+      "title": "This Video Ends When We Beat Minecraft Hardcore.. (ft. Jynxzi & Los)",
+      "clips": [
+        {
+          "start": 8066.72,
+          "end": 8126.72,
+          "file": "clips/03_stable-ronaldo_BaX8SToPrWU_8066.mp4"
+        },
+        {
+          "start": 10243.2,
+          "end": 10303.2,
+          "file": "clips/04_stable-ronaldo_BaX8SToPrWU_10243.mp4"
+        }
+      ],
+      "last_run": "2026-11-02T17:56:09+00:00"
+    },
+    "vy2uTVhoHlE": {
+      "title": "I Turned $1 To $10,000 In Vegas Gambling!",
+      "clips": [
+        {
+          "start": 701.78,
+          "end": 761.78,
+          "file": "clips/05_jasontheween_vy2uTVhoHlE_0701.mp4"
+        },
+        {
+          "start": 1046.8,
+          "end": 1106.8,
+          "file": "clips/06_jasontheween_vy2uTVhoHlE_1046.mp4"
+        }
+      ],
+      "last_run": "2026-11-02T18:27:08+00:00"
+    },
+    "ee03VSREhMg": {
+      "title": "Introducing My Son..",
+      "clips": [
+        {
+          "start": 1597.32,
+          "end": 1657.32,
+          "file": "clips/07_marlon_ee03VSREhMg_1597.mp4"
+        },
+        {
+          "start": 1682.83,
+          "end": 1742.83,
+          "file": "clips/08_marlon_ee03VSREhMg_1682.mp4"
+        }
+      ],
+      "last_run": "2026-11-02T18:29:27+00:00"
+    },
+    "twXkubFZ7_M": {
+      "title": "I Tested Every Cafe in Japan!",
+      "clips": [
+        {
+          "start": 46.27,
+          "end": 106.27,
+          "file": "clips/09_lacy_twXkubFZ7_M_0046.mp4"
+        },
+        {
+          "start": 351.65,
+          "end": 411.65,
+          "file": "clips/10_lacy_twXkubFZ7_M_0351.mp4"
+        }
+      ],
+      "last_run": "2026-11-02T18:32:43+00:00"
     }
   },
   "runs": [
@@ -935,6 +1015,11 @@
     },
     {
       "at": "2026-11-01T18:49:50+00:00",
+      "produced": 10,
+      "requested": 10
+    },
+    {
+      "at": "2026-11-02T18:32:43+00:00",
       "produced": 10,
       "requested": 10
     }
