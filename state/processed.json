@@ -960,6 +960,86 @@
         }
       ],
       "last_run": "2026-11-02T18:32:43+00:00"
+    },
+    "0Z5mAl9Y3mc": {
+      "title": "CORE WHO CAN MAKE THE MOST MONEY IN 24 HOURS",
+      "clips": [
+        {
+          "start": 421.84,
+          "end": 481.84,
+          "file": "clips/01_core_0Z5mAl9Y3mc_0421.mp4"
+        },
+        {
+          "start": 2306.48,
+          "end": 2366.48,
+          "file": "clips/02_core_0Z5mAl9Y3mc_2306.mp4"
+        }
+      ],
+      "last_run": "2026-11-03T20:03:44+00:00"
+    },
+    "_DizBo_s8EE": {
+      "title": "I Got Scammed By Kai Cenat!",
+      "clips": [
+        {
+          "start": 76.94,
+          "end": 136.94,
+          "file": "clips/03_stable-ronaldo__DizBo_s8EE_0076.mp4"
+        },
+        {
+          "start": 606.78,
+          "end": 666.78,
+          "file": "clips/04_stable-ronaldo__DizBo_s8EE_0606.mp4"
+        }
+      ],
+      "last_run": "2026-11-03T20:05:42+00:00"
+    },
+    "6ZoS9C3WfQE": {
+      "title": "Streamer Last To Leave Circle Wins $10,000!",
+      "clips": [
+        {
+          "start": 1826.64,
+          "end": 1886.64,
+          "file": "clips/05_jasontheween_6ZoS9C3WfQE_1826.mp4"
+        },
+        {
+          "start": 2402.08,
+          "end": 2462.08,
+          "file": "clips/06_jasontheween_6ZoS9C3WfQE_2402.mp4"
+        }
+      ],
+      "last_run": "2026-11-03T20:10:22+00:00"
+    },
+    "GKxvSIh3Muw": {
+      "title": "CORE Surprises Silky With A Birthday Cake!",
+      "clips": [
+        {
+          "start": 498.67,
+          "end": 558.67,
+          "file": "clips/07_marlon_GKxvSIh3Muw_0498.mp4"
+        },
+        {
+          "start": 1201.87,
+          "end": 1261.87,
+          "file": "clips/08_marlon_GKxvSIh3Muw_1201.mp4"
+        }
+      ],
+      "last_run": "2026-11-03T20:15:43+00:00"
+    },
+    "Td4RLYjYbQA": {
+      "title": "My First Time In South Korea!",
+      "clips": [
+        {
+          "start": 178.13,
+          "end": 238.13,
+          "file": "clips/09_lacy_Td4RLYjYbQA_0178.mp4"
+        },
+        {
+          "start": 1268.59,
+          "end": 1328.59,
+          "file": "clips/10_lacy_Td4RLYjYbQA_1268.mp4"
+        }
+      ],
+      "last_run": "2026-11-03T20:18:23+00:00"
     }
   },
   "runs": [
@@ -1020,6 +1100,11 @@
     },
     {
       "at": "2026-11-02T18:32:43+00:00",
+      "produced": 10,
+      "requested": 10
+    },
+    {
+      "at": "2026-11-03T20:18:23+00:00",
       "produced": 10,
       "requested": 10
     }
