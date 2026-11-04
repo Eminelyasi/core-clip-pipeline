@@ -1040,6 +1040,86 @@
         }
       ],
       "last_run": "2026-11-03T20:18:23+00:00"
+    },
+    "vH6igv_RlrE": {
+      "title": "CORE FAMILY FEUD",
+      "clips": [
+        {
+          "start": 272.05,
+          "end": 332.05,
+          "file": "clips/01_core_vH6igv_RlrE_0272.mp4"
+        },
+        {
+          "start": 1297.16,
+          "end": 1357.16,
+          "file": "clips/02_core_vH6igv_RlrE_1297.mp4"
+        }
+      ],
+      "last_run": "2026-11-04T20:24:16+00:00"
+    },
+    "-EcY50r3Y20": {
+      "title": "3AM With Jynxzi & Los..",
+      "clips": [
+        {
+          "start": 557.68,
+          "end": 617.68,
+          "file": "clips/03_stable-ronaldo_-EcY50r3Y20_0557.mp4"
+        },
+        {
+          "start": 619.21,
+          "end": 679.21,
+          "file": "clips/04_stable-ronaldo_-EcY50r3Y20_0619.mp4"
+        }
+      ],
+      "last_run": "2026-11-04T20:26:19+00:00"
+    },
+    "z-ppLuisuq4": {
+      "title": "Stuck In A Maybach With Ludwig!",
+      "clips": [
+        {
+          "start": 127.27,
+          "end": 187.27,
+          "file": "clips/05_jasontheween_z-ppLuisuq4_0127.mp4"
+        },
+        {
+          "start": 171.91,
+          "end": 231.91,
+          "file": "clips/06_jasontheween_z-ppLuisuq4_0171.mp4"
+        }
+      ],
+      "last_run": "2026-11-04T20:29:03+00:00"
+    },
+    "44k3hidfBcc": {
+      "title": "My Final Votes For Steamer Awards..",
+      "clips": [
+        {
+          "start": 366.68,
+          "end": 426.68,
+          "file": "clips/07_marlon_44k3hidfBcc_0366.mp4"
+        },
+        {
+          "start": 671.97,
+          "end": 731.97,
+          "file": "clips/08_marlon_44k3hidfBcc_0671.mp4"
+        }
+      ],
+      "last_run": "2026-11-04T20:31:09+00:00"
+    },
+    "gASHxDsgjxc": {
+      "title": "CORE CELEBRATES HALLOWEEN IN JAPAN!",
+      "clips": [
+        {
+          "start": 86.06,
+          "end": 146.06,
+          "file": "clips/09_lacy_gASHxDsgjxc_0086.mp4"
+        },
+        {
+          "start": 197.01,
+          "end": 257.01,
+          "file": "clips/10_lacy_gASHxDsgjxc_0197.mp4"
+        }
+      ],
+      "last_run": "2026-11-04T20:33:18+00:00"
     }
   },
   "runs": [
@@ -1105,6 +1185,11 @@
     },
     {
       "at": "2026-11-03T20:18:23+00:00",
+      "produced": 10,
+      "requested": 10
+    },
+    {
+      "at": "2026-11-04T20:33:18+00:00",
       "produced": 10,
       "requested": 10
     }
